@@ -45,8 +45,8 @@ def _path(name: str, default: Path) -> Path:
 FACTS_PATH = _path("TRIAGE_FACTS_PATH", REPO_ROOT / "facts.json")
 CACHE_DIR = _path("TRIAGE_CACHE_DIR", REPO_ROOT / ".cache")
 
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
-GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite")
+GROQ_MODEL = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "meta-llama/llama-3.3-70b-instruct:free")
 
 GEMINI_API_KEYS = _csv("GEMINI_API_KEYS")

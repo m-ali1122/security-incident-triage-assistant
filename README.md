@@ -43,7 +43,7 @@ Copy `.env.example` to `.env`. Each key variable is a comma-separated list, so s
 | Variable | Meaning | Default |
 |---|---|---|
 | `GEMINI_API_KEYS`, `GROQ_API_KEYS`, `OPENROUTER_API_KEYS` | key lists, tried in that provider order | empty |
-| `GEMINI_MODEL`, `GROQ_MODEL`, `OPENROUTER_MODEL` | model names | `gemini-2.0-flash`, `llama-3.3-70b-versatile`, `meta-llama/llama-3.3-70b-instruct:free` |
+| `GEMINI_MODEL`, `GROQ_MODEL`, `OPENROUTER_MODEL` | model names | `gemini-3.1-flash-lite`, `openai/gpt-oss-120b`, `meta-llama/llama-3.3-70b-instruct:free` |
 | `LLM_ENABLED` | `0` turns every LLM call off | `1` |
 | `TRIAGE_DATA_DIR` | data pack folder | `problem_c_data` |
 | `REQUEST_TIMEOUT_S` | API request limit, seconds | `30` |
