@@ -2,7 +2,7 @@
 
 Tech Fusion '26 AI Hackathon, Problem C. Company in the data pack: Orbit Logistics (made up).
 
-Live link: <!-- LIVE_LINK -->
+Live link: https://security-incident-triage-assistant.vercel.app
 Demo video: <!-- DEMO_VIDEO -->
 
 ## 1. What it does

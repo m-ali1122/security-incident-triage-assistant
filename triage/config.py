@@ -37,8 +37,13 @@ DATA_DIR = _data if _data.is_absolute() else REPO_ROOT / _data
 PACKAGE_DIR = REPO_ROOT / "triage"
 PROFILES_DIR = PACKAGE_DIR / "profiles"
 RULES_YAML = PACKAGE_DIR / "rules.yaml"
-FACTS_PATH = REPO_ROOT / "facts.json"
-CACHE_DIR = REPO_ROOT / ".cache"
+def _path(name: str, default: Path) -> Path:
+    raw = os.getenv(name, "").strip()
+    return Path(raw) if raw else default
+
+
+FACTS_PATH = _path("TRIAGE_FACTS_PATH", REPO_ROOT / "facts.json")
+CACHE_DIR = _path("TRIAGE_CACHE_DIR", REPO_ROOT / ".cache")
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
 GROQ_MODEL = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
