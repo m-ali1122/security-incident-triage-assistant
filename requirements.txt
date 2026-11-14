@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+networkx
+pyyaml
+httpx
+pytest
+python-dotenv
