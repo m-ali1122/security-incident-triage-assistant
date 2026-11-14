@@ -1296,7 +1296,15 @@ def build_bundle(route: Any, facts: Any) -> Bundle:
             h_overview(b, ctx)
     if b.kind not in ("out_of_scope", "other_date", "alert_harmless", "change", "approval_rule", "alert_order"):
         if b.kind == "overview":
-            pass
+            # "what now?" / "who needs a heads up?" with no named entity: answer for
+            # every incident instead of dropping the asked-for actions or notifications.
+            if {"actions", "notify"} & set(route.intents) and ctx.incidents:
+                if not b.incident_ids:
+                    b.focus(*[inc.incident_id for inc in ctx.incidents])
+                if "actions" in route.intents:
+                    add_actions(b, ctx)
+                if "notify" in route.intents:
+                    add_notify(b, ctx)
         else:
             if {"severity", "notify"} & set(route.intents) or b.kind == "incident":
                 add_severity(b, ctx)

@@ -37,7 +37,7 @@ def load_cases(tables) -> list[dict]:
 
 
 def run_routers(q: str, tables) -> dict:
-    a = route(q, tables)
+    a = route(q, tables, use_classifier=False)
     ci, cp = classifier.predict(q)
     c = classifier.route_with_classifier(q, tables)
     return {"rules": a.intents, "rules_route": a.route, "clf": [ci] if ci else [], "clf_p": cp,

@@ -42,17 +42,5 @@ def predict(question: str) -> tuple[str | None, float]:
 
 
 def route_with_classifier(question: str, tables: Any = None) -> Route:
-    r = route(question, tables)
-    if r.route != "none" and r.intents:
-        return r
-    intent, p = predict(question)
-    if intent is not None and p >= THRESHOLD:
-        r.intents = [intent]
-        r.route = "classifier"
-        r.confidence = round(p, 2)
-        r.notes = list(r.notes) + [f"classifier intent {intent} (p={p:.2f})"]
-        if intent == "injection":
-            r.injection = True
-        if intent == "out_of_scope":
-            r.out_of_scope = True
-    return r
+    """Integrated router: rules first, this classifier as a second opinion (see router.route)."""
+    return route(question, tables, use_classifier=True)

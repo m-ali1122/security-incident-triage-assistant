@@ -77,6 +77,7 @@ class Route:
     question: str = ""
     incidents: list[str] = field(default_factory=list)  # incidents the question's topics map to
     time_kinds: dict[str, str] = field(default_factory=dict)  # UTC time -> 'utc' | 'pkt' | 'bare'
+    weak: bool = False  # intents come only from the entity default, not from an explicit cue
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -301,14 +302,22 @@ INJECTION_RE = re.compile(
     r"ignore\s+(?:all\s+|any\s+)?(?:your|the|previous|prior|above)?\s*(?:rules|instructions|policy|policies)|"
     r"disregard\s+(?:your|the|all|previous)|forget\s+(?:your|the|all)\s+(?:rules|instructions)|"
     r"\b(?:write|say|state|claim|report|answer)\s+that\b|you\s+are\s+now|system\s+prompt|\bpretend\b|"
-    r"\bact\s+as\b|override\s+(?:the\s+)?labels?|developer\s+mode",
+    r"\bact\s+as\b|override\s+(?:the\s+)?labels?|developer\s+mode|"
+    r"reveal\s+(?:ur|your|the)\s+(?:hidden\s+|secret\s+)?(?:instructions|prompt|rules)|"
+    r"(?:answer|respond|reply)\s+as\s+(?:DAN\b|an?\s+unrestricted)|\bjailbreak|"
+    r"(?:drop|skip|remove|without)\s+(?:the\s+|any\s+)?(?:citations?|citation\s+requirement|caveats|verification)|"
+    r"no\s+caveats|mark\s+(?:everything|all|it|them)\s+(?:as\s+)?confirmed|"
+    r"\bsay\s+(?:[A-Z][a-z]+\s+){1,2}(?:is|was)\s+(?:guilty|responsible|the\s+attacker)",
     re.I)
 
 OUT_OF_SCOPE_RE = re.compile(
     r"\bCVEs?\b|\bCVE-\d{4}|threat[- ]actors?|\battribution\b|\battribut(?:e|ed)\s+to\b|\bAPT\s?\d*\b|"
     r"nation[- ]state|who\s+(?:is|was)\s+behind|which\s+(?:hacker\s+)?group|"
     r"other\s+compan(?:y|ies)|another\s+company|competitors?|"
-    r"^\s*what\s+(?:is|are)\s+(?:a|an)\s+[a-z][a-z \-]{1,30}\?*\s*$|general\s+security\s+trivia",
+    r"^\s*what\s+(?:is|are)\s+(?:a|an)\s+[a-z][a-z \-]{1,30}\?*\s*$|general\s+security\s+trivia|"
+    r"\bbest\s+[\w-]+(?:\s+[\w-]+)?\s+(?:to\s+buy|to\s+use|vendor|product)|"
+    r"\bwhich\s+(?:siem|edr|firewall|vendor|product)\s+(?:should|to)\b|"
+    r"\b(?:tell|write)\s+(?:me\s+)?a\s+(?:joke|poem)|\bjokes?\b|\bpoem\b|\bweather\b|\brecipe\b",
     re.I)
 
 
@@ -319,7 +328,89 @@ def strip_injection(question: str) -> str:
     return " ".join(keep).strip()
 
 
-def route(question: str, tables=None, facts=None) -> Route:
+# Intent cues: English synonyms, indirect phrasing and common Roman Urdu cues.
+INTENT_RULES: dict[str, str] = {
+    "data_theft": r"\b(?:stolen|stole|steal\w*|leak(?:ed|s)?|exfiltrat\w*|exfil|cop(?:y|ied)|theft|"
+                  r"which files|what was read|data theft|read the\b[^?.]*\b(?:database|files?|data)|"
+                  r"walk(?:ed|s)? out|taken out|(?:left|leave|leaving|leaves) the (?:network|building|company|org\w*)|"
+                  r"(?:going|sent|went|uploaded|moved) (?:out|to an? (?:outside|external))|outside address|"
+                  r"external (?:ip|address|host|drive)|usb|chura\w*)\b",
+    "incident_relation": r"\b(?:same incident|separate incidents?|part of the same|one incident|"
+                         r"share\w*\s+(?:any\s+)?evidence|same timestamp|same time|related|unrelated|connected|"
+                         r"linked|same (?:attacker|actor|campaign|hamle|hamla|group|person)|one actor|"
+                         r"(?:led|lead|leads|leading) to|caused by|stem\w* from|tied together|"
+                         r"alag alag|ek hi|hissa)\b",
+    "missing_data": r"\b(?:missing|no logs?|not enough evidence|file audit|EDR|proxy log|DB01 logs?|gap|"
+                    r"what happened during|which files|database|malware|read the .*database|logs? exist|"
+                    r"blind spots?|nothing from|no data|no telemetry|no visibility|"
+                    r"what can'?t we (?:say|tell|know|conclude)|"
+                    r"logs? (?:are |were )?(?:silent|empty)|anything recorded|recorded)\b",
+    "alert_harmless": r"\b(?:harmless|approved|approves?|legitimate|suspicious|benign|false positive|closed|"
+                      r"false alarm|supposed to be|planned|scheduled|maintenance|expected|authori[sz]ed|"
+                      r"routine|nightly|real threat|just noise|panic)\b",
+    "severity": r"\b(?:severity|priority|P[1-4]|critical|severe|how bad|rank\w*|code[- ]red|grade\w*|"
+                r"rating|how serious|how urgent|prioriti[sz]\w*)\b",
+    "timeline": r"\b(?:when|what time|start\w*|close\w*|end|timeline|first|last|success(?:ful)?|kab|occur\w*|"
+                r"timestamp|unfold\w*|step by step|sequence|chronolog\w*|in order|order batao|pehle|phir|"
+                r"walk me through|at which moment)\b",
+    "entity_match": r"\b(?:who owns?|owner|resolve|what asset|which host|which ip|which user|who is|whose|"
+                    r"belongs?|kis ne|kaun|why|reason|what evidence|log(?:ged)?\s+(?:in|on)|logon|login|"
+                    r"which (?:workstation|laptop|machine|device)|what role|ke paas)\b",
+    "history": r"\b(?:history|always|owned|lease|activity|(?:at|around|about|before|after)\s+\d{1,2}:\d{2}|"
+               r"sitting on|before lunch|after lunch|did that change|changed? (?:hands|later)|"
+               r"looking back|ever been|used by|anybody other|anyone other|someone else|previously|over time)\b",
+    "actions": r"\b(?:actions?|(?:what|which)\b[^?]*\bresponse|what should|should we|do with|do about|"
+               r"disable|block|reboot\w*|wipe|reset|preserv\w*|runbook|open .*runbook|kya karna|kya karein|"
+               r"recommend\w*|next steps?|mitigat\w*|remediat\w*|what now|isolat\w*|kill the|pull the plug|"
+               r"shut (?:it )?down|containment)\b",
+    "notify": r"\b(?:inform\w*|notif\w*|escalat\w*|receiv(?:e|es)|who must|who to|"
+              r"who\b[^?]*\b(?:call|contact|tell)|contact\w*|heads[- ]up|needs? to know|deadline|"
+              r"bataa?na|bataye|bataen|kis ko|kisko|regulator)\b",
+    "report": r"\b(?:full report|incident report|summari[sz]e|summary|overview|report|kya hua|condense|"
+              r"board meeting|briefing|whole story|full story|sab kuch|recap|tl;?dr|write[- ]?up|"
+              r"executive summary|big picture)\b",
+}
+
+# Single-word cues matched with an edit-distance allowance, for typos such as
+# "severty", "timelin", "exfiltarted", "notifiy". Only words of 6+ letters.
+TYPO_CUES: dict[str, str] = {
+    "stolen": "data_theft", "exfiltrated": "data_theft", "exfiltration": "data_theft",
+    "related": "incident_relation", "connected": "incident_relation", "separate": "incident_relation",
+    "missing": "missing_data", "harmless": "alert_harmless", "legitimate": "alert_harmless",
+    "approved": "alert_harmless", "suspicious": "alert_harmless", "severity": "severity",
+    "priority": "severity", "critical": "severity", "timeline": "timeline", "history": "history",
+    "runbook": "actions", "recommend": "actions", "isolate": "actions", "escalate": "notify",
+    "notify": "notify", "inform": "notify", "summary": "report", "summarize": "report", "report": "report",
+}
+
+
+def _typo_intents(low: str) -> list[str]:
+    out: list[str] = []
+    for tok in set(re.findall(r"[a-z]{6,}", low)):
+        if tok in TYPO_CUES:
+            continue
+        for cue, intent in TYPO_CUES.items():
+            if abs(len(cue) - len(tok)) > 2 or tok[0] != cue[0]:
+                continue
+            limit = 1 if len(cue) < 9 else 2
+            if _levenshtein(tok, cue) <= limit:
+                out.append(intent)
+    return out
+
+
+def _classifier_opinion(question: str) -> tuple[str | None, float]:
+    """Optional trained classifier; (None, 0.0) when scikit-learn or the model is missing."""
+    try:
+        from triage.answer import classifier
+        return classifier.predict(question)
+    except Exception:
+        return None, 0.0
+
+
+CLASSIFIER_THRESHOLD = 0.6
+
+
+def route(question: str, tables=None, facts=None, use_classifier: bool = True) -> Route:
     if tables is None and facts is not None:
         tables = getattr(facts, "tables", None)
     tables = tables if tables is not None else load_tables()
@@ -333,26 +424,7 @@ def route(question: str, tables=None, facts=None) -> Route:
     dates, other_date = _dates(q, tables, notes)
     injection = bool(INJECTION_RE.search(q))
     outscope = bool(OUT_OF_SCOPE_RE.search(q))
-    rules = {
-        "data_theft": r"\b(?:stolen|stole|steal\w*|leak(?:ed|s)?|exfiltrated|exfiltrate|cop(?:y|ied)|"
-                      r"which files|what was read|data theft|read the\b[^?.]*\b(?:database|files?|data))\b",
-        "incident_relation": r"\b(?:same incident|separate incidents?|part of the same|one incident|"
-                             r"share\w*\s+(?:any\s+)?evidence|same timestamp|same time|related|connected|"
-                             r"linked|same attacker)\b",
-        "missing_data": r"\b(?:missing|no logs?|not enough evidence|file audit|EDR|proxy log|DB01 logs?|gap|what happened during|which files|database|malware|read the .*database|logs? exist)\b",
-        "alert_harmless": r"\b(?:harmless|approved|approves?|legitimate|suspicious|benign|false positive|closed)\b",
-        "severity": r"\b(?:severity|priority|P[1-4]|critical|severe|how bad)\b",
-        "timeline": r"\b(?:when|what time|start\w*|close\w*|end|timeline|first|last|success(?:ful)?|kab|occur\w*|timestamp)\b",
-        "entity_match": r"\b(?:who owns?|owner|resolve|what asset|which host|which ip|which user|who is|whose|"
-                        r"belongs?|kis ne|kaun|why|reason|what evidence|log(?:ged)?\s+(?:in|on)|logon|login)\b",
-        "history": r"\b(?:history|always|owned|lease|activity|at \d{1,2}:\d{2})\b",
-        "actions": r"\b(?:actions?|(?:what|which)\b[^?]*\bresponse|what should|should we|do with|do about|"
-                   r"disable|block|reboot\w*|wipe|reset|preserv\w*|runbook|open .*runbook|kya karna|"
-                   r"recommend\w*|next steps?|mitigat\w*|remediat\w*)\b",
-        "notify": r"\b(?:inform\w*|notif\w*|escalat\w*|receiv(?:e|es)|who must|who to|"
-                  r"who\b[^?]*\b(?:call|contact|tell)|contact\w*)\b",
-        "report": r"\b(?:full report|incident report|summari[sz]e|summary|overview|report|kya hua)\b",
-    }
+    rules = dict(INTENT_RULES)
     found = [name for name in INTENTS if name == "injection" and injection]
     if outscope:
         found.append("out_of_scope")
@@ -361,6 +433,7 @@ def route(question: str, tables=None, facts=None) -> Route:
             continue
         if re.search(rules.get(intent, r"(?!)"), low, re.I):
             found.append(intent)
+    found.extend(_typo_intents(low))
     if re.search(r"\b(?:ALT-\d+|alert)\b", q, re.I) and re.search(r"\b(?:attack|escalat)\w*\b", q, re.I):
         found.append("alert_harmless")
     if re.search(r"\b(?:kitna|kitni)\b", low) and re.search(r"\b(?:data|file|transfer)\w*\b", low):
@@ -373,12 +446,30 @@ def route(question: str, tables=None, facts=None) -> Route:
         found.append("missing_data")
     # Questions such as "who clicked?" or "is this timestamp...?" can be
     # answered by entity resolution even when they contain no special verb.
+    weak = False
     if any(entities.values()) and not found:
         found.append("entity_match")
+        weak = True
     if any(entities.values()) and re.search(r"\bsuspicious\b", low):
         found.append("entity_match")
     # Preserve the public priority order and avoid duplicate additions.
     intents = [x for x in INTENTS if x in found]
+    how = "rules" if intents else "none"
+    conf = (round(min(0.99, 0.72 + 0.05 * len(intents) + (0.08 if any(entities.values()) else 0)), 2)
+            if intents else 0.0)
+    # Second opinion from the optional classifier: only when the rules found no
+    # explicit cue; it never overrides injection / out-of-scope handling.
+    if use_classifier and (not intents or weak) and not injection and not outscope:
+        ci, cp = _classifier_opinion(q)
+        allowed = ci not in ("injection", "out_of_scope") or (not intents and not any(entities.values()))
+        if ci in INTENTS and cp >= CLASSIFIER_THRESHOLD and allowed:
+            if ci == "injection":
+                injection = True
+            if ci == "out_of_scope":
+                outscope = True
+            intents = [x for x in INTENTS if x in set(intents) | {ci}]
+            how, conf = "classifier", round(cp, 2)
+            notes.append(f"classifier intent {ci} (p={cp:.2f})")
     if injection:
         notes.append("question contains instruction-like text")
     if outscope:
@@ -389,6 +480,5 @@ def route(question: str, tables=None, facts=None) -> Route:
             incidents.append(i)
     return Route(intents=intents, entities=entities, times_utc=times, dates=dates,
                  other_date=other_date, injection=injection, out_of_scope=outscope,
-                 route="rules" if intents else "none",
-                 confidence=round(min(0.99, 0.72 + 0.05 * len(intents) + (0.08 if any(entities.values()) else 0)), 2)
-                 if intents else 0.0, notes=notes, question=q, incidents=incidents, time_kinds=kinds)
+                 route=how, confidence=conf, notes=notes, question=q, incidents=incidents,
+                 time_kinds=kinds, weak=weak)
