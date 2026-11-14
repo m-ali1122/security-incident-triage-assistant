@@ -65,3 +65,18 @@ def test_status_never_exposes_key_values(tmp_path):
     pool = make_pool(tmp_path, [provider])
     pool.complete("s", "u")
     assert "do-not-return-this" not in repr(pool.status())
+
+
+def test_env_timeout_and_breaker_read_at_call_time(tmp_path, monkeypatch):
+    from triage.llm.pool import HTTPProvider
+    monkeypatch.delenv("LLM_TIMEOUT_S", raising=False)
+    provider = HTTPProvider("groq", "m", ["k"])
+    assert provider.timeout == 20.0
+    monkeypatch.setenv("LLM_TIMEOUT_S", "7")
+    assert provider.timeout == 7.0
+
+    clock = Clock()
+    monkeypatch.setenv("BREAKER_OPEN_S", "5")
+    pool = make_pool(tmp_path, [Fake("groq", ["a"], [ProviderError(500)] * 2)], clock)
+    assert pool.complete("s", "u") is None
+    assert pool._state["groq"]["breaker"] == clock.now + 5.0

@@ -30,9 +30,20 @@ class ProviderError(Exception):
         self.retry_after = retry_after
 
 
+def _env_float(name: str, default: float) -> float:
+    try:
+        return float(os.getenv(name, default))
+    except (TypeError, ValueError):
+        return default
+
+
 class HTTPProvider:
-    def __init__(self, name: str, model: str, keys: list[str], timeout: float = 20.0) -> None:
-        self.name, self.model, self.keys, self.timeout = name, model, keys, timeout
+    def __init__(self, name: str, model: str, keys: list[str], timeout: float | None = None) -> None:
+        self.name, self.model, self.keys, self._timeout = name, model, keys, timeout
+
+    @property
+    def timeout(self) -> float:
+        return self._timeout if self._timeout is not None else _env_float("LLM_TIMEOUT_S", 20.0)
 
     def complete(self, key: str, system: str, user: str, json_mode: bool) -> str:
         if self.name == "gemini":
@@ -180,8 +191,9 @@ class Pool:
             raise ProviderError(message=str(exc)) from exc
 
     def _open_breaker(self, name: str, state: dict[str, Any]) -> None:
-        state["breaker"] = self.clock() + 60.0
-        self._event("breaker_open", name, seconds=60)
+        seconds = _env_float("BREAKER_OPEN_S", 60.0)
+        state["breaker"] = self.clock() + seconds
+        self._event("breaker_open", name, seconds=seconds)
 
     def status(self) -> dict[str, Any]:
         providers = self._configured()
