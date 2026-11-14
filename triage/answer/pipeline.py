@@ -2,7 +2,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+from pathlib import Path
 from typing import Any, Optional
 
 from triage.models import Answer, _empty_structured
@@ -108,6 +110,43 @@ def _phrase(question: str, bundle: Any, structured: dict, facts: Any) -> tuple[O
     return None, {"provider": provider, "cached": cached, "validator_errors": errors}
 
 
+_SEED_PATH = Path(__file__).with_name("seed_cache.json")
+_SEED: Optional[dict] = None
+
+
+def normalise_question(q: str) -> str:
+    q = re.sub(r"\s+", " ", str(q or "").lower()).strip()
+    return q.rstrip(" .?!;:,").strip()
+
+
+def _seed_cache() -> dict:
+    global _SEED
+    if _SEED is None:
+        try:
+            data = json.loads(_SEED_PATH.read_text(encoding="utf-8"))
+            _SEED = data if isinstance(data, dict) else {}
+        except Exception:
+            _SEED = {}
+    return _SEED
+
+
+def _seed_lookup(question: str, facts: Any, fh: str) -> Optional[Answer]:
+    """Return a pre-warmed answer if it still validates against the current facts."""
+    try:
+        entry = _seed_cache().get(normalise_question(question))
+        if not entry:
+            return None
+        from triage.answer.validate import validate
+        a = Answer.from_dict(entry)
+        if validate(a.answer, a.structured, facts):
+            return None
+        a.meta = dict(a.meta)
+        a.meta.update(cached=True, facts_hash=fh)
+        return a
+    except Exception:
+        return None
+
+
 def answer(question: str, facts=None, use_llm=None) -> Answer:
     """Answer a question from the fact store. Never raises; works with the LLM disabled."""
     fh = ""
@@ -121,6 +160,10 @@ def answer(question: str, facts=None, use_llm=None) -> Answer:
         if use_llm is None:
             use_llm = _llm_default()
         question = str(question or "")
+        if use_llm is not False and os.environ.get("TRIAGE_SEED_CACHE", "1") != "0":
+            hit = _seed_lookup(question, facts, fh)
+            if hit is not None:
+                return hit
         r = _route(question, facts)
         route_step = "rules"
         if r.route == "none":
