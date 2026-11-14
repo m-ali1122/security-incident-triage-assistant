@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Incident Triage Assistant</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="top">
+  <div class="brand">
+    <span class="logo" aria-hidden="true">&#9670;</span>
+    <h1>Incident Triage</h1>
+    <span id="mode" class="tag" title="Data source"></span>
+  </div>
+  <div id="status" class="status" role="status" aria-live="polite" aria-label="System status">
+    <span class="muted">status loading</span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Views">
+  <button role="tab" id="tab-chat" aria-controls="view-chat" aria-selected="true" data-view="chat">Chat</button>
+  <button role="tab" id="tab-report" aria-controls="view-report" aria-selected="false" tabindex="-1" data-view="report">Report</button>
+  <button role="tab" id="tab-timeline" aria-controls="view-timeline" aria-selected="false" tabindex="-1" data-view="timeline">Timeline</button>
+  <button role="tab" id="tab-panels" aria-controls="view-panels" aria-selected="false" tabindex="-1" data-view="panels">Harmless and gaps</button>
+  <button role="tab" id="tab-whatif" aria-controls="view-whatif" aria-selected="false" tabindex="-1" data-view="whatif">What-if</button>
+</nav>
+
+<div id="whatif-banner" class="banner" hidden role="alert">
+  <strong>HYPOTHETICAL.</strong> A what-if result is shown below. It is not the real fact store.
+  <button type="button" id="whatif-clear" class="link">Clear</button>
+</div>
+
+<main id="main">
+  <section id="view-chat" role="tabpanel" aria-labelledby="tab-chat">
+    <form id="ask-form" class="ask" autocomplete="off">
+      <label for="q" class="sr">Question</label>
+      <textarea id="q" rows="2" placeholder="Ask about the incident, an asset, an IP, an alert or a change ID" maxlength="2000"></textarea>
+      <button type="submit" class="primary" id="ask-btn">Ask</button>
+    </form>
+    <div class="samples" aria-label="Sample questions">
+      <span class="muted small">Try:</span>
+      <span id="samples"></span>
+    </div>
+    <div id="chat-log" class="chat-log" aria-live="polite"></div>
+  </section>
+
+  <section id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden>
+    <div class="bar">
+      <div id="inc-switch" class="switch" role="group" aria-label="Incident"></div>
+      <span id="report-meta" class="muted small"></span>
+    </div>
+    <div id="report"></div>
+  </section>
+
+  <section id="view-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden>
+    <div class="bar">
+      <label class="field">Incident
+        <select id="tl-inc"></select>
+      </label>
+      <label class="field grow">Filter text
+        <input id="tl-text" type="search" placeholder="IP, user, file, alert ID">
+      </label>
+      <span id="tl-count" class="muted small" aria-live="polite"></span>
+    </div>
+    <div id="timeline"></div>
+  </section>
+
+  <section id="view-panels" role="tabpanel" aria-labelledby="tab-panels" hidden>
+    <div class="cols">
+      <div>
+        <h2>Closed as harmless</h2>
+        <div id="harmless"></div>
+        <h3>Changes that approve nothing</h3>
+        <div id="decoys"></div>
+      </div>
+      <div>
+        <h2>Missing log sources</h2>
+        <div id="gaps"></div>
+      </div>
+    </div>
+    <h2>Entity resolution</h2>
+    <div id="entities"></div>
+  </section>
+
+  <section id="view-whatif" role="tabpanel" aria-labelledby="tab-whatif" hidden>
+    <h2>What-if policy editor</h2>
+    <p class="muted">Change one policy cell and see what recomputes. Nothing is written to the data. Results are marked hypothetical.</p>
+    <form id="whatif-form" class="whatif">
+      <label class="field">Change
+        <select id="wi-kind">
+          <option value="severity_cell">Severity matrix cell</option>
+          <option value="change_status">Change calendar status</option>
+        </select>
+      </label>
+      <span id="wi-sev" class="inline">
+        <label class="field">Incident type <input id="wi-row" value="Data exfiltration"></label>
+        <label class="field">Column
+          <select id="wi-col"><option>Medium</option><option selected>High</option><option>Critical</option><option>Low</option></select>
+        </label>
+        <label class="field">New severity
+          <select id="wi-val"><option>P1</option><option selected>P2</option><option>P3</option><option>P4</option></select>
+        </label>
+      </span>
+      <span id="wi-chg" class="inline" hidden>
+        <label class="field">Change ID <input id="wi-chid" value="CHG-2026-1104-05"></label>
+        <label class="field">Status
+          <select id="wi-status"><option selected>Approved</option><option>Postponed, not performed</option></select>
+        </label>
+      </span>
+      <button type="submit" class="primary">Recompute</button>
+    </form>
+    <div id="whatif-out" aria-live="polite"></div>
+  </section>
+</main>
+
+<footer class="foot muted small">
+  Times are UTC with PKT (UTC+5) in brackets. Log text shown here is untrusted data and is never executed.
+</footer>
+<script src="app.js"></script>
+</body>
+</html>
