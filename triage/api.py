@@ -326,3 +326,83 @@ def root():
 _web = config.REPO_ROOT / "web"
 if _web.exists():
     app.mount("/app", StaticFiles(directory=str(_web), html=True), name="web")
+
+
+# Alternate-pack routes are kept lazy so the normal API import has the same
+# startup behaviour and the optional feature has no effect until used.
+@app.post("/load")
+async def load_pack_route(request: Request):
+    import zipfile
+    from pathlib import Path
+    from triage import packs
+
+    try:
+        content_type = request.headers.get("content-type", "").lower()
+        if content_type.startswith("application/json"):
+            body = await request.json()
+            source = body.get("path") if isinstance(body, dict) else None
+            if not source:
+                raise ValueError("JSON body must contain path")
+            candidate = Path(source)
+            if not candidate.is_absolute():
+                candidate = config.REPO_ROOT / candidate
+            resolved = candidate.resolve()
+            allowed = [config.REPO_ROOT.resolve(), (config.CACHE_DIR / "packs").resolve()]
+            if not any(resolved == root or root in resolved.parents for root in allowed):
+                raise HTTPException(422, "path must be under the repository or pack cache")
+            source = resolved
+        elif content_type.startswith("multipart/"):
+            # Keep this endpoint independent of python-multipart, which is
+            # intentionally not a core dependency of the service.
+            boundary = content_type.split("boundary=", 1)[-1].strip().strip('"')
+            if not boundary:
+                raise ValueError("multipart request has no boundary")
+            body = await request.body()
+            marker = ("--" + boundary).encode()
+            source = None
+            for part in body.split(marker):
+                head, separator, payload = part.partition(b"\r\n\r\n")
+                if not separator or b'filename=' not in head:
+                    continue
+                source = payload[:-2] if payload.endswith(b"\r\n") else payload
+                break
+            if source is None:
+                raise ValueError("multipart upload must contain a zip file")
+        else:
+            raise ValueError("use JSON {path} or multipart zip upload")
+        info = packs.load_pack(source)
+        packs.activate(info.facts_hash)
+        # The pre-existing API cache is intentionally updated only here, after
+        # the complete build succeeded.
+        global _facts
+        _facts = info.facts
+        default = next(p for p in packs.list_packs() if p.is_default)
+        diff = packs.diff_packs(info, default)
+        return {"facts_hash": info.facts_hash, "active": True, "files": info.files,
+                "unparsed": info.unparsed,
+                "incidents": [{"incident_id": i["incident_id"], "severity": i.get("severity")}
+                              for i in info.facts.engine.to_dict().get("incidents", [])],
+                "diff_vs_default": diff,
+                "note": "Detectors assume the entity kinds of the original pack."}
+    except HTTPException:
+        raise
+    except (ValueError, OSError, zipfile.BadZipFile) as exc:
+        raise HTTPException(422, str(exc)) from exc
+
+
+@app.get("/packs")
+def packs_route():
+    from triage import packs
+    return {"packs": [p.to_dict() for p in packs.list_packs()]}
+
+
+@app.post("/packs/{facts_hash}/activate")
+def activate_pack_route(facts_hash: str):
+    from triage import packs
+    try:
+        info = packs.activate(facts_hash)
+    except KeyError as exc:
+        raise HTTPException(404, "unknown pack") from exc
+    global _facts
+    _facts = info.facts
+    return {"facts_hash": info.facts_hash, "active": True}
