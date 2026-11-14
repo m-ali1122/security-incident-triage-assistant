@@ -52,6 +52,8 @@ FAIL = [
     "The attacker used a stolen password and data was stolen.",
     "Files were not scanned, and the data was exfiltrated.",
     "Sensitive documents have been leaked.",
+    "The attacker used stolen credentials and files were stolen.",
+    "No alert fired and data was exfiltrated.",
 ]
 
 
@@ -136,6 +138,11 @@ def test_times():
     assert check_times("At 06:04:12 UTC it began.", F)
     assert check_times("At 06:03:12 it began.", F)
     assert check_times("At 11:03:13 PKT it began.", F)
+
+
+def test_time_ranges():
+    assert check_times("From 06:03:12 to 06:21:19 UTC.", F) == []
+    assert check_times("From 06:03:13 to 06:21:19 UTC.", F)
 
 
 def test_severity():

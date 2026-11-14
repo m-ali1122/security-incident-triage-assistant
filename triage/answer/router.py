@@ -21,7 +21,45 @@ INTENTS = [
 ENTITY_KEYS = [
     "ips", "hostnames", "asset_tags", "usernames", "alert_ids", "change_ids",
     "runbook_ids", "session_ids", "msg_ids", "domains", "incident_ids", "cves", "topics",
+    "accounts",
 ]
+
+# Question vocabulary -> topic. These are words people use, not data-pack values.
+TOPIC_PHRASES: dict[str, tuple[str, ...]] = {
+    "vpn_foreign_login": ("romanian login", "romania", "romanian", "vpn login", "new country", "foreign login"),
+    "large_transfer": ("big transfer", "large transfer", "large internal transfer", "transfer",
+                       "exfiltration", "smb transfer", "2.4 gb"),
+    "scan": ("the scan", "port scan", "external scan", "scan", "scanning", "recon", "reconnaissance"),
+    "sqli": ("sql injection", "sqlmap", "sqli", "sql"),
+    "phishing": ("phishing email", "phishing mail", "phishing link", "phishing", "phish", "lookalike"),
+    "rdp": ("remote desktop", "rdp"),
+    "mfa": ("mfa", "push", "fatigue"),
+    "click": ("click", "clicked", "clicks"),
+    "concurrent": ("concurrent", "two places", "same time from"),
+    "quarantine": ("quarantine", "quarantined", "score"),
+    "lease": ("lease", "dhcp"),
+    "malware": ("malware", "virus", "infected"),
+    "credential": ("credential", "credentials", "password"),
+    "legal": ("legal",),
+    "gap": ("gap", "reboot of the firewall", "firewall reboot"),
+}
+
+# Engine rule names each topic covers (code vocabulary of triage.rules, not data).
+TOPIC_RULES: dict[str, set] = {
+    "vpn_foreign_login": {"mfa_fatigue"},
+    "mfa": {"mfa_fatigue"},
+    "large_transfer": {"large_transfer"},
+    "scan": {"recon"},
+    "sqli": {"web_attack", "web_attack_success"},
+    "phishing": {"phishing_delivered", "phishing_click", "phishing_no_click", "phishing_credential_entry"},
+    "click": {"phishing_click", "phishing_no_click"},
+    "quarantine": {"phishing_delivered"},
+    "concurrent": {"concurrent_use"},
+    "credential": {"mfa_fatigue", "attacker_session", "phishing_credential_entry", "password_reset"},
+}
+# A more specific topic replaces the broader one it refines.
+TOPIC_OVERRIDES = {"click": {"phishing"}, "quarantine": {"phishing"}, "concurrent": {"credential"},
+                   "mfa": {"credential"}}
 
 
 @dataclass
@@ -36,6 +74,9 @@ class Route:
     route: str = "none"
     confidence: float = 0.0
     notes: list[str] = field(default_factory=list)
+    question: str = ""
+    incidents: list[str] = field(default_factory=list)  # incidents the question's topics map to
+    time_kinds: dict[str, str] = field(default_factory=dict)  # UTC time -> 'utc' | 'pkt' | 'bare'
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -49,7 +90,33 @@ class Route:
             "route": self.route,
             "confidence": self.confidence,
             "notes": self.notes,
+            "incidents": self.incidents,
         }
+
+
+def topic_rules(topics: list[str]) -> set:
+    """Engine rules for a list of topics, with specific topics replacing broad ones."""
+    active = set(topics)
+    for specific, broad in TOPIC_OVERRIDES.items():
+        if specific in active:
+            active -= broad
+    out: set = set()
+    for t in active:
+        out |= TOPIC_RULES.get(t, set())
+    return out
+
+
+def topic_incidents(topics: list[str], facts: Any) -> list[str]:
+    """Map question topics to incident IDs through the engine's findings."""
+    rules = topic_rules(topics)
+    if not rules or facts is None:
+        return []
+    eng = getattr(facts, "engine", None)
+    out: list[str] = []
+    for inc in list(getattr(eng, "incidents", []) or []) + list(getattr(eng, "anomalies", []) or []):
+        if any(f.rule in rules for f in inc.findings) and inc.incident_id not in out:
+            out.append(inc.incident_id)
+    return out
 
 
 def _uniq(values: list[str]) -> list[str]:
@@ -161,24 +228,40 @@ def _extract_entities(q: str, tables: Any, entities: dict[str, list[str]]) -> No
                                        for part in name.split() if len(part) >= 5):
                 add("usernames", username)
                 break
-    topic_phrases = {
-        "vpn_foreign_login": ("romanian login",), "large_transfer": ("big transfer", "large transfer"),
-        "scan": ("the scan", "port scan", "external scan", "recon"), "sqli": ("sql injection", "sqlmap"),
-        "phishing": ("phishing email", "phishing mail", "phishing link"), "rdp": ("remote desktop", "rdp"),
-    }
-    for topic, phrases in topic_phrases.items():
+    for topic, phrases in TOPIC_PHRASES.items():
         if any(re.search(r"\b" + re.escape(p) + r"\b", q, re.I) for p in phrases):
             add("topics", topic)
+    for m in re.finditer(r"(?<![\w\\])([A-Za-z][A-Za-z0-9-]*\\[A-Za-z](?:[A-Za-z0-9._-]*[A-Za-z0-9_-])?)", q):
+        add("accounts", m.group(1))
+    # Changes named by what they are ("the VPN firmware update", "the FS01 backup").
+    stop = {"the", "a", "an", "of", "in", "and", "to", "for", "on", "by", "servers", "server"}
+    qwords = {w.lower() for w in re.findall(r"[A-Za-z0-9]+", q)}
+    for ch in _field(tables, "changes", []) or []:
+        cid = str(_field(ch, "change_id", ""))
+        desc = {w.lower() for w in re.findall(r"[A-Za-z0-9]+", str(_field(ch, "description", "")))} - stop
+        score = len(desc & qwords)
+        system = str(_field(ch, "system", ""))
+        if system and any(re.search(r"(?<![\w-])" + re.escape(x) + r"(?![\w-])", q, re.I)
+                          for x in {system, system.split("-")[-1]} if len(x) >= 3):
+            score += 1
+        actors = [str(x) for x in (_field(ch, "actor_usernames", []) or [])]
+        actors += [str(x) for x in (_field(ch, "actor_names", []) or [])]
+        if any(a and re.search(r"(?<![\w])" + re.escape(a) + r"(?![\w])", q, re.I) for a in actors):
+            score += 1
+        if cid and score >= 2:
+            add("change_ids", cid)
 
 
-def _times(q: str, notes: list[str]) -> list[str]:
+def _times(q: str, notes: list[str], kinds: dict | None = None) -> list[str]:
     out = []
+    kinds = kinds if kinds is not None else {}
     for m in re.finditer(r"(?<![\d:])(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(UTC|PKT)?\b", q, re.I):
         h, mi, sec = int(m.group(1)), int(m.group(2)), int(m.group(3) or 0)
         if h > 23 or mi > 59 or sec > 59:
             continue
         if m.group(4) and m.group(4).upper() == "PKT":
             dt = datetime(2000, 1, 1, h, mi, sec) - timedelta(hours=5)
+            kinds.setdefault(dt.strftime("%H:%M:%S"), "pkt")
         else:
             dt = datetime(2000, 1, 1, h, mi, sec)
             # In a range such as "06:32 and 07:12 UTC", the trailing zone
@@ -188,6 +271,9 @@ def _times(q: str, notes: list[str]) -> list[str]:
                 q[m.end():], re.I))
             if not m.group(4) and not inherited_zone:
                 notes.append("bare time assumed UTC")
+                kinds.setdefault(dt.strftime("%H:%M:%S"), "bare")
+            else:
+                kinds.setdefault(dt.strftime("%H:%M:%S"), "utc")
         out.append(dt.strftime("%H:%M:%S"))
     return _uniq(out)
 
@@ -211,29 +297,61 @@ def _dates(q: str, tables: Any, notes: list[str]) -> tuple[list[str], bool]:
     return found, bool(covered and any(d != covered for d in found))
 
 
-def route(question: str, tables=None) -> Route:
+INJECTION_RE = re.compile(
+    r"ignore\s+(?:all\s+|any\s+)?(?:your|the|previous|prior|above)?\s*(?:rules|instructions|policy|policies)|"
+    r"disregard\s+(?:your|the|all|previous)|forget\s+(?:your|the|all)\s+(?:rules|instructions)|"
+    r"\b(?:write|say|state|claim|report|answer)\s+that\b|you\s+are\s+now|system\s+prompt|\bpretend\b|"
+    r"\bact\s+as\b|override\s+(?:the\s+)?labels?|developer\s+mode",
+    re.I)
+
+OUT_OF_SCOPE_RE = re.compile(
+    r"\bCVEs?\b|\bCVE-\d{4}|threat[- ]actors?|\battribution\b|\battribut(?:e|ed)\s+to\b|\bAPT\s?\d*\b|"
+    r"nation[- ]state|who\s+(?:is|was)\s+behind|which\s+(?:hacker\s+)?group|"
+    r"other\s+compan(?:y|ies)|another\s+company|competitors?|"
+    r"^\s*what\s+(?:is|are)\s+(?:a|an)\s+[a-z][a-z \-]{1,30}\?*\s*$|general\s+security\s+trivia",
+    re.I)
+
+
+def strip_injection(question: str) -> str:
+    """Drop sentences or clauses that carry instruction-like text; keep the rest of the question."""
+    parts = re.split(r"(?<=[.;?!])\s+|;\s*", question or "")
+    keep = [p for p in parts if p.strip() and not INJECTION_RE.search(p)]
+    return " ".join(keep).strip()
+
+
+def route(question: str, tables=None, facts=None) -> Route:
+    if tables is None and facts is not None:
+        tables = getattr(facts, "tables", None)
     tables = tables if tables is not None else load_tables()
     q = question or ""
     low = q.lower()
     entities = {k: [] for k in ENTITY_KEYS}
     notes: list[str] = []
     _extract_entities(q, tables, entities)
-    times = _times(q, notes)
+    kinds: dict = {}
+    times = _times(q, notes, kinds)
     dates, other_date = _dates(q, tables, notes)
-    injection = bool(re.search(r"ignore\s+(?:your|the)\s+rules|write\s+that|you\s+are\s+now|system\s+prompt|pretend|say\s+that\s+data\s+was\s+(?:leaked|stolen)", low))
-    outscope = bool(re.search(r"\bCVE(?:[- ]?\d{4})?|threat actor|attribution|APT\b|other companies?|general security trivia|what is (?:a|the) (?:firewall|malware|sql injection)\b|\bsqlmap\b", q, re.I))
+    injection = bool(INJECTION_RE.search(q))
+    outscope = bool(OUT_OF_SCOPE_RE.search(q))
     rules = {
-        "data_theft": r"\b(?:stolen|leaked|exfiltrat\w*|cop(?:y|ied)|which files|what was read|data theft)\b",
-        "incident_relation": r"\b(?:same incident|separate incident|part of the same|one incident|share evidence)\b",
-        "missing_data": r"\b(?:missing|no logs?|not enough evidence|file audit|EDR|proxy log|DB01 logs?|gap|what happened during|which files|database|malware|read the .*database)\b",
-        "alert_harmless": r"\b(?:harmless|approved|approve|legitimate|suspicious)\b",
-        "severity": r"\b(?:severity|priority|P[1-4])\b",
-        "timeline": r"\b(?:when|what time|start|close|end|timeline|first|last|success(?:ful)?|kab)\b",
-        "entity_match": r"\b(?:who owns?|owner|resolve|what asset|which host|who is|kis ne|kaun|why|reason|what evidence)\b",
+        "data_theft": r"\b(?:stolen|stole|steal\w*|leak(?:ed|s)?|exfiltrated|exfiltrate|cop(?:y|ied)|"
+                      r"which files|what was read|data theft|read the\b[^?.]*\b(?:database|files?|data))\b",
+        "incident_relation": r"\b(?:same incident|separate incidents?|part of the same|one incident|"
+                             r"share\w*\s+(?:any\s+)?evidence|same timestamp|same time|related|connected|"
+                             r"linked|same attacker)\b",
+        "missing_data": r"\b(?:missing|no logs?|not enough evidence|file audit|EDR|proxy log|DB01 logs?|gap|what happened during|which files|database|malware|read the .*database|logs? exist)\b",
+        "alert_harmless": r"\b(?:harmless|approved|approves?|legitimate|suspicious|benign|false positive|closed)\b",
+        "severity": r"\b(?:severity|priority|P[1-4]|critical|severe|how bad)\b",
+        "timeline": r"\b(?:when|what time|start\w*|close\w*|end|timeline|first|last|success(?:ful)?|kab|occur\w*|timestamp)\b",
+        "entity_match": r"\b(?:who owns?|owner|resolve|what asset|which host|which ip|which user|who is|whose|"
+                        r"belongs?|kis ne|kaun|why|reason|what evidence|log(?:ged)?\s+(?:in|on)|logon|login)\b",
         "history": r"\b(?:history|always|owned|lease|activity|at \d{1,2}:\d{2})\b",
-        "actions": r"\b(?:actions?|response|what should|should we|do with|disable|block|reboot|wipe|reset|preserve|open .*runbook|kya karna)\b",
-        "notify": r"\b(?:inform|notify|escalat|receiv(?:e|es)|who must|who to)\b",
-        "report": r"\b(?:full report|summari[sz]e|report|kya hua)\b",
+        "actions": r"\b(?:actions?|(?:what|which)\b[^?]*\bresponse|what should|should we|do with|do about|"
+                   r"disable|block|reboot\w*|wipe|reset|preserv\w*|runbook|open .*runbook|kya karna|"
+                   r"recommend\w*|next steps?|mitigat\w*|remediat\w*)\b",
+        "notify": r"\b(?:inform\w*|notif\w*|escalat\w*|receiv(?:e|es)|who must|who to|"
+                  r"who\b[^?]*\b(?:call|contact|tell)|contact\w*)\b",
+        "report": r"\b(?:full report|incident report|summari[sz]e|summary|overview|report|kya hua)\b",
     }
     found = [name for name in INTENTS if name == "injection" and injection]
     if outscope:
@@ -265,8 +383,12 @@ def route(question: str, tables=None) -> Route:
         notes.append("question contains instruction-like text")
     if outscope:
         notes.append("outside the data pack scope")
+    incidents = list(entities.get("incident_ids", []))
+    for i in topic_incidents(entities.get("topics", []), facts):
+        if i not in incidents:
+            incidents.append(i)
     return Route(intents=intents, entities=entities, times_utc=times, dates=dates,
                  other_date=other_date, injection=injection, out_of_scope=outscope,
                  route="rules" if intents else "none",
                  confidence=round(min(0.99, 0.72 + 0.05 * len(intents) + (0.08 if any(entities.values()) else 0)), 2)
-                 if intents else 0.0, notes=notes)
+                 if intents else 0.0, notes=notes, question=q, incidents=incidents, time_kinds=kinds)

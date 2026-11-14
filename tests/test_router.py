@@ -96,3 +96,12 @@ def test_all_public_intents_and_keys_are_declared():
     assert set(INTENTS) >= {"timeline", "entity_match", "severity", "alert_harmless", "history",
                              "actions", "notify", "missing_data", "report", "incident_relation",
                              "data_theft", "out_of_scope", "injection"}
+
+
+def test_sqlmap_question_not_out_of_scope():
+    assert not route("Which IP ran sqlmap against the web server?").out_of_scope
+
+
+def test_two_asks():
+    r = route("What should we do about the amalik account and who do we call?")
+    assert "actions" in r.intents and "notify" in r.intents

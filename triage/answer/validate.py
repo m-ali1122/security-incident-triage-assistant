@@ -76,11 +76,17 @@ _CRED_AFTER = re.compile(rf"^\W*(?:\w+\W+){{0,2}}?{_CRED}\b")
 _CRED_BEFORE = re.compile(rf"\b{_CRED}\b(?:\W+\w+){{0,4}}\W*$")
 
 
+# A hedge only excuses the conjunct it sits in: "stolen credentials and files were
+# stolen" is two conjuncts, and the second one is an unhedged assertion.
+_CONJUNCT_SPLIT = re.compile(r",|\b(?:and|so|then|plus|also|which|thus|hence|therefore)\b")
+
+
 def _clauses(sentence: str):
     for c in _CLAUSE_SPLIT.split(sentence):
-        c = c.strip()
-        if c:
-            yield c
+        for sub in _CONJUNCT_SPLIT.split(c or ""):
+            sub = sub.strip()
+            if sub:
+                yield sub
 
 
 def _clause_asserts(clause_orig: str) -> Optional[str]:
@@ -222,18 +228,29 @@ def _shift(t: str, hours: int) -> str:
     return f"{(int(h) + hours) % 24:02d}:{m}:{s}"
 
 
+# "06:03:12 to 06:21:19 UTC": the trailing zone labels both ends of the range.
+_TIME_RANGE = re.compile(
+    r"(?<![\d:])(\d{2}:\d{2}:\d{2})\s*(?:to|and|-|–)\s*(\d{2}:\d{2}:\d{2})\s*(UTC|PKT)\b")
+
+
 def check_times(text: str, facts: Facts) -> list:
     errors = []
     known = set(facts.known_times_utc())
     known_pkt = {_shift(t, 5) for t in known}
     text = text or ""
+    labelled = set()
+    for m in _TIME_RANGE.finditer(text):
+        zone_known = known if m.group(3) == "UTC" else known_pkt
+        if m.group(1) not in zone_known:
+            errors.append(f"time: {m.group(1)} {m.group(3)} does not match any time in the fact store")
+        labelled.add(m.start(1))
     for m in _TIME_UTC.finditer(text):
         if m.group(1) not in known:
             errors.append(f"time: {m.group(1)} UTC is not in the fact store")
     for m in _TIME_PKT.finditer(text):
         if m.group(1) not in known_pkt:
             errors.append(f"time: {m.group(1)} PKT does not match any UTC time in the fact store")
-    labelled = {m.start(1) for m in _TIME_UTC.finditer(text)} | {m.start(1) for m in _TIME_PKT.finditer(text)}
+    labelled |= {m.start(1) for m in _TIME_UTC.finditer(text)} | {m.start(1) for m in _TIME_PKT.finditer(text)}
     for m in _TIME_ANY.finditer(text):
         if m.start(1) not in labelled:
             errors.append(f"time: {m.group(1)} has no UTC label")
