@@ -447,7 +447,7 @@
      "step": 1,
      "text": "No approved scan matches 192.0.2.88.",
      "cite": {
-      "file": "10_runbook_recon_scan.md",
+      "file": "10_runbook_scanning_recon.md",
       "runbook": "RB-SCAN-05",
       "step": 1
      }
@@ -457,7 +457,7 @@
      "step": 3,
      "text": "Block 192.0.2.88.",
      "cite": {
-      "file": "10_runbook_recon_scan.md",
+      "file": "10_runbook_scanning_recon.md",
       "runbook": "RB-SCAN-05",
       "step": 3
      }
@@ -467,7 +467,7 @@
      "step": 5,
      "text": "Only 443 answered and no logins followed.",
      "cite": {
-      "file": "10_runbook_recon_scan.md",
+      "file": "10_runbook_scanning_recon.md",
       "runbook": "RB-SCAN-05",
       "step": 5
      }
@@ -477,7 +477,7 @@
      "step": 6,
      "text": "Close out per the runbook (ticket only).",
      "cite": {
-      "file": "10_runbook_recon_scan.md",
+      "file": "10_runbook_scanning_recon.md",
       "runbook": "RB-SCAN-05",
       "step": 6
      }
@@ -512,7 +512,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T02:58:41Z vpn_login user=utariq src_ip=182.180.44.12 country=PK assigned_ip=10.10.3.12 session=VS-20411 result=success  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T02:58:41Z vpn01 auth result=SUCCESS user=utariq src_ip=182.180.44.12 geo=PK assigned_ip=10.10.3.12 session=VS-20411 mfa=push_approved",
     "fields": {
      "user": "utariq",
      "src_ip": "182.180.44.12",
@@ -533,7 +533,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:10:05Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=22 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:05 fw-edge01 DENY tcp 192.0.2.88:51522 -> 203.0.113.10:22 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -552,7 +552,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:10:08Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=23 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:07 fw-edge01 DENY tcp 192.0.2.88:51523 -> 203.0.113.10:23 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -571,7 +571,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T03:10:10Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=3389 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:09 fw-edge01 DENY tcp 192.0.2.88:51524 -> 203.0.113.10:3389 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -590,7 +590,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T03:10:12Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=445 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:12 fw-edge01 DENY tcp 192.0.2.88:51525 -> 203.0.113.10:445 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -609,7 +609,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T03:10:15Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=8080 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:15 fw-edge01 DENY tcp 192.0.2.88:51526 -> 203.0.113.10:8080 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -628,7 +628,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T03:10:21Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=443 action=ALLOW bytes=1850  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:21 fw-edge01 ALLOW tcp 192.0.2.88:51530 -> 203.0.113.10:443 rule=web-public bytes=1850",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -645,10 +645,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T03:10:21Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:10:21Z web_request src_ip=192.0.2.88 method=GET url=/admin status=404  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.88 - - [04/Nov/2026:08:10:21 +0500] \"GET /admin HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
     "fields": {
      "src_ip": "192.0.2.88",
      "method": "GET",
@@ -667,7 +667,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T03:10:22Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9001",
     "raw": "2026-11-04T03:10:22Z ids_alert alert_id=ALT-9001  # MOCK line, rebuilt from fields",
@@ -683,10 +683,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T03:10:23Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:10:23Z web_request src_ip=192.0.2.88 method=GET url=/phpmyadmin/ status=404  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.88 - - [04/Nov/2026:08:10:23 +0500] \"GET /phpmyadmin/ HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
     "fields": {
      "src_ip": "192.0.2.88",
      "method": "GET",
@@ -705,10 +705,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T03:10:25Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T03:10:25Z web_request src_ip=192.0.2.88 method=GET url=/.env status=404  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.88 - - [04/Nov/2026:08:10:25 +0500] \"GET /.env HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
     "fields": {
      "src_ip": "192.0.2.88",
      "method": "GET",
@@ -727,10 +727,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T03:20:11Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:20:11Z dhcp_lease host=LT-IT-003 ip=10.20.9.3  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 08:20:11 +05:00 DHCPACK ip=10.20.9.3 mac=3c:52:82:aa:03:0b hostname=LT-IT-003 lease=8h",
     "fields": {
      "host": "LT-IT-003",
      "ip": "10.20.9.3"
@@ -747,7 +747,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:41:09Z vpn_login user=braza src_ip=39.40.88.201 country=PK assigned_ip=10.10.3.18 session=VS-20415 result=success  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T03:41:09Z vpn01 auth result=SUCCESS user=braza src_ip=39.40.88.201 geo=PK assigned_ip=10.10.3.18 session=VS-20415 mfa=push_approved",
     "fields": {
      "user": "braza",
      "src_ip": "39.40.88.201",
@@ -768,7 +768,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T03:55:00Z firewall_session src_ip=10.20.5.22 dst_ip=142.250.185.46 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:55:00 fw-edge01 ALLOW tcp 10.20.5.22:50711 -> 142.250.185.46:443 rule=outbound-web bytes=88231",
     "fields": {
      "src_ip": "10.20.5.22",
      "dst_ip": "142.250.185.46",
@@ -784,10 +784,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T03:57:40Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:57:40Z dhcp_lease host=LT-FIN-014 ip=10.20.5.14  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 08:57:40 +05:00 DHCPACK ip=10.20.5.14 mac=3c:52:82:aa:14:0e hostname=LT-FIN-014 lease=8h",
     "fields": {
      "host": "LT-FIN-014",
      "ip": "10.20.5.14"
@@ -801,10 +801,10 @@
     "kind": "kerberos_tgt",
     "ts_utc": "2026-11-04T03:58:02Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:58:02Z kerberos_tgt user=amalik workstation=LT-FIN-014 event_id=4768  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:58:02 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "workstation": "LT-FIN-014",
@@ -819,10 +819,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T03:58:03Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T03:58:03Z dhcp_lease host=LT-FIN-022 ip=10.20.5.22  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 08:58:03 +05:00 DHCPACK ip=10.20.5.22 mac=3c:52:82:aa:22:1c hostname=LT-FIN-022 lease=8h",
     "fields": {
      "host": "LT-FIN-022",
      "ip": "10.20.5.22"
@@ -836,10 +836,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T04:01:15Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T04:01:15Z dhcp_lease host=LT-WH-021 ip=10.20.7.8  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 09:01:15 +05:00 DHCPACK ip=10.20.7.8 mac=3c:52:82:aa:21:07 hostname=LT-WH-021 lease=8h",
     "fields": {
      "host": "LT-WH-021",
      "ip": "10.20.7.8"
@@ -856,7 +856,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T04:10:32Z firewall_session src_ip=10.20.5.14 dst_ip=10.10.1.20 dst_port=445 bytes=1204551  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 09:15:44 fw-int01 ALLOW tcp 10.20.5.14:51002 -> 10.10.1.20:445 bytes_total=1204551 duration=312s",
     "fields": {
      "src_ip": "10.20.5.14",
      "dst_ip": "10.10.1.20",
@@ -875,7 +875,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T04:12:07Z email_delivered msg_id=M-55187 recipient=amalik sender_domain=orbit-logistlcs.example spf=fail score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 09:12:07 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=amalik@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
     "fields": {
      "msg_id": "M-55187",
      "recipient": "amalik",
@@ -899,7 +899,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T04:12:07Z email_delivered msg_id=M-55187 recipient=sraheel score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 09:12:07 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=sraheel@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
     "fields": {
      "msg_id": "M-55187",
      "recipient": "sraheel",
@@ -921,7 +921,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T04:12:08Z email_delivered msg_id=M-55187 recipient=utariq score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 09:12:08 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=utariq@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
     "fields": {
      "msg_id": "M-55187",
      "recipient": "utariq",
@@ -940,10 +940,10 @@
     "kind": "kerberos_tgt",
     "ts_utc": "2026-11-04T04:15:44Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T04:15:44Z kerberos_tgt user=utariq workstation=LT-WH-021 event_id=4768  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 04:15:44 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\utariq | client=10.20.7.8 | workstation=LT-WH-021 | result=SUCCESS",
     "fields": {
      "user": "utariq",
      "workstation": "LT-WH-021",
@@ -961,7 +961,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T04:19:40Z firewall_session src_ip=10.20.5.14 dst_ip=198.51.100.77 dst_port=443 action=ALLOW bytes=18442  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 04:19:40 fw-edge01 ALLOW tcp 10.20.5.14:50833 -> 198.51.100.77:443 rule=outbound-web bytes=18442",
     "fields": {
      "src_ip": "10.20.5.14",
      "dst_ip": "198.51.100.77",
@@ -978,7 +978,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T04:19:41Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9002",
     "raw": "2026-11-04T04:19:41Z ids_alert alert_id=ALT-9002  # MOCK line, rebuilt from fields",
@@ -997,7 +997,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T04:20:15Z firewall_session src_ip=10.20.7.8 dst_ip=151.101.65.69 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 04:20:15 fw-edge01 ALLOW tcp 10.20.7.8:50901 -> 151.101.65.69:443 rule=outbound-web bytes=412",
     "fields": {
      "src_ip": "10.20.7.8",
      "dst_ip": "151.101.65.69",
@@ -1016,7 +1016,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T04:47:49Z firewall_session src_ip=10.20.7.8 dst_port=443  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 09:48:03 fw-int01 ALLOW tcp 10.20.7.8:50214 -> 10.10.2.10:443 bytes_total=88120 duration=14s",
     "fields": {
      "src_ip": "10.20.7.8",
      "dst_port": 443
@@ -1033,7 +1033,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T05:46:50Z firewall_session src_ip=198.51.100.77 dst_ip=203.0.113.20 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:46:50 fw-edge01 ALLOW tcp 198.51.100.77:60021 -> 203.0.113.20:443 rule=vpn-gateway bytes=5120",
     "fields": {
      "src_ip": "198.51.100.77",
      "dst_ip": "203.0.113.20",
@@ -1052,7 +1052,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T05:46:58Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:46:58Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -1071,7 +1071,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T05:47:31Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:47:31Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -1090,7 +1090,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T05:48:02Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_timeout  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:48:02Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_timeout",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -1109,7 +1109,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T05:48:40Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:48:40Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -1128,7 +1128,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T05:49:10Z firewall_session src_ip=198.51.100.77 dst_ip=203.0.113.20 dst_port=443 action=ALLOW bytes=9250112  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:49:10 fw-edge01 ALLOW tcp 198.51.100.77:60112 -> 203.0.113.20:443 rule=vpn-gateway bytes=9250112",
     "fields": {
      "src_ip": "198.51.100.77",
      "dst_ip": "203.0.113.20",
@@ -1148,7 +1148,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T05:49:12Z vpn_login user=amalik src_ip=198.51.100.77 country=RO assigned_ip=10.10.3.45 session=VS-20433 result=success  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:49:12Z vpn01 auth result=SUCCESS user=amalik src_ip=198.51.100.77 geo=RO assigned_ip=10.10.3.45 session=VS-20433 mfa=push_approved",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -1166,7 +1166,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T05:49:13Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9003",
     "raw": "2026-11-04T05:49:13Z ids_alert alert_id=ALT-9003  # MOCK line, rebuilt from fields",
@@ -1182,10 +1182,10 @@
     "kind": "kerberos_tgt",
     "ts_utc": "2026-11-04T05:55:31Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T05:55:31Z kerberos_tgt user=amalik src_ip=10.10.3.45 workstation=unknown event_id=4768  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:55:31 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\amalik | client=10.10.3.45 | workstation=unknown | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "src_ip": "10.10.3.45",
@@ -1204,7 +1204,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T05:55:32Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.10 dst_port=88  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 10:55:34 fw-int01 ALLOW tcp 10.10.3.45:49801 -> 10.10.1.5:88 bytes_total=3312 duration=2s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.10",
@@ -1219,10 +1219,10 @@
     "kind": "kerberos_service_ticket",
     "ts_utc": "2026-11-04T05:55:33Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T05:55:33Z kerberos_service_ticket user=amalik spn=cifs/FS01.orbit.local event_id=4769  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:55:33 UTC | DC01 | EventID=4769 | Kerberos service ticket | account=ORBIT\\amalik | service=cifs/FS01.orbit.local | client=10.10.3.45 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "spn": "cifs/FS01.orbit.local",
@@ -1240,7 +1240,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T05:55:34Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.20 dst_port=445 bytes=4096  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 10:55:41 fw-int01 ALLOW tcp 10.10.3.45:49805 -> 10.10.1.20:445 bytes_total=4096 duration=7s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.20",
@@ -1256,10 +1256,10 @@
     "kind": "kerberos_service_ticket",
     "ts_utc": "2026-11-04T05:58:44Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T05:58:44Z kerberos_service_ticket user=amalik spn=MSSQLSvc/DB01.orbit.local:1433 event_id=4769  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:58:44 UTC | DC01 | EventID=4769 | Kerberos service ticket | account=ORBIT\\amalik | service=MSSQLSvc/DB01.orbit.local:1433 | client=10.10.3.45 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "spn": "MSSQLSvc/DB01.orbit.local:1433",
@@ -1277,7 +1277,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T05:58:44Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.30 dst_port=1433 bytes=1240 duration_s=8  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 10:58:52 fw-int01 ALLOW tcp 10.10.3.45:49830 -> 10.10.1.30:1433 bytes_total=1240 duration=8s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.30",
@@ -1297,7 +1297,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:03:12Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.20 dst_port=445 bytes_server_to_client=2411724800 duration_s=1087  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 11:21:19 fw-int01 ALLOW tcp 10.10.3.45:49871 -> 10.10.1.20:445 bytes_total=2426727912 bytes_server_to_client=2411724800 duration=1087s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.20",
@@ -1317,7 +1317,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T06:05:10Z firewall_session src_ip=192.0.2.150 dst_ip=203.0.113.10 dst_port=443 action=ALLOW bytes=96340  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 06:05:10 fw-edge01 ALLOW tcp 192.0.2.150:44120 -> 203.0.113.10:443 rule=web-public bytes=96340",
     "fields": {
      "src_ip": "192.0.2.150",
      "dst_ip": "203.0.113.10",
@@ -1334,10 +1334,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:05:12Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:05:12Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:05:12 +0500] \"GET /orders/search?id=1%27 HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -1358,7 +1358,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T06:05:13Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9004",
     "raw": "2026-11-04T06:05:13Z ids_alert alert_id=ALT-9004  # MOCK line, rebuilt from fields",
@@ -1374,10 +1374,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:05:31Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T06:05:31Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' AND 1=1-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:05:14 +0500] \"GET /orders/search?id=1%27%20OR%20%271%27%3D%271 HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -1398,10 +1398,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:05:50Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T06:05:50Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' ORDER BY 9-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:05:41 +0500] \"GET /orders/search?id=1%20ORDER%20BY%2010-- HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -1422,10 +1422,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:06:08Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T06:06:08Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' UNION SELECT ... status=200 size=48213 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:06:02 +0500] \"GET /orders/search?id=-1%20UNION%20SELECT%20NULL,username,password%20FROM%20users-- HTTP/1.1\" 200 48213 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -1446,10 +1446,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:06:20Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T06:06:20Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' AND SLEEP(5)-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:06:20 +0500] \"GET /orders/search?id=1;WAITFOR%20DELAY%20%270:0:5%27-- HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -1470,7 +1470,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T06:21:20Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9005",
     "raw": "2026-11-04T06:21:20Z ids_alert alert_id=ALT-9005  # MOCK line, rebuilt from fields",
@@ -1489,7 +1489,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T06:31:10Z firewall_session src_ip=10.20.5.22 dst_ip=10.10.1.20 dst_port=445  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 11:31:50 fw-int01 ALLOW tcp 10.20.5.22:50990 -> 10.10.1.20:445 bytes_total=220118 duration=40s",
     "fields": {
      "src_ip": "10.20.5.22",
      "dst_ip": "10.10.1.20",
@@ -1504,10 +1504,10 @@
     "kind": "password_reset",
     "ts_utc": "2026-11-04T06:42:17Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:42:17Z password_reset user=amalik actor=amalik src_ip=10.10.3.45 event_id=4724  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 06:42:17 UTC | DC01 | EventID=4724 | Password reset attempt | target=ORBIT\\amalik | caller=ORBIT\\amalik | client=10.10.3.45 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "actor": "amalik",
@@ -1526,7 +1526,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:42:30Z email_delivered recipient=amalik  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 11:42:30 PKT] msgid=M-55340 from=noreply@orbitlogistics.example to=amalik@orbitlogistics.example subject=\"Your password was changed\" spf=pass dkim=pass score=0.1 action=delivered",
     "fields": {
      "recipient": "amalik"
     },
@@ -1544,7 +1544,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T07:12:44Z vpn_session_end user=amalik session=VS-20433 duration_s=5012 bytes_to_client=2418331648  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T07:12:44Z vpn01 session_end session=VS-20433 user=amalik duration=5012s bytes_to_client=2418331648 bytes_from_client=9122031",
     "fields": {
      "user": "amalik",
      "session": "VS-20433",
@@ -1560,10 +1560,10 @@
     "kind": "logon_failure",
     "ts_utc": "2026-11-04T07:31:12Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T07:31:12Z logon_failure user=amalik workstation=LT-FIN-014 event_id=4625  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 07:31:12 UTC | DC01 | EventID=4625 | Logon failed | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | reason=bad_password",
     "fields": {
      "user": "amalik",
      "workstation": "LT-FIN-014",
@@ -1578,10 +1578,10 @@
     "kind": "logon_failure",
     "ts_utc": "2026-11-04T07:31:48Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T07:31:48Z logon_failure user=amalik workstation=LT-FIN-014 event_id=4625  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 07:31:48 UTC | DC01 | EventID=4625 | Logon failed | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | reason=bad_password",
     "fields": {
      "user": "amalik",
      "workstation": "LT-FIN-014",
@@ -1596,10 +1596,10 @@
     "kind": "account_lockout",
     "ts_utc": "2026-11-04T07:32:50Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T07:32:50Z account_lockout user=amalik event_id=4740  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 07:32:50 UTC | DC01 | EventID=4740 | Account locked out | account=ORBIT\\amalik | caller=LT-FIN-014",
     "fields": {
      "user": "amalik",
      "event_id": 4740
@@ -1613,7 +1613,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T07:32:51Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9008",
     "raw": "2026-11-04T07:32:51Z ids_alert alert_id=ALT-9008  # MOCK line, rebuilt from fields",
@@ -1632,7 +1632,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T10:15:20Z vpn_session_end user=utariq session=VS-20411  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T10:15:20Z vpn01 session_end session=VS-20411 user=utariq duration=26199s bytes_to_client=88120331 bytes_from_client=4120993",
     "fields": {
      "user": "utariq",
      "session": "VS-20411"
@@ -1649,7 +1649,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T12:30:02Z vpn_session_end user=braza session=VS-20415  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T12:30:02Z vpn01 session_end session=VS-20415 user=braza duration=31733s bytes_to_client=140220019 bytes_from_client=22003811",
     "fields": {
      "user": "braza",
      "session": "VS-20415"
@@ -1663,10 +1663,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T16:05:10Z",
     "ts_end_utc": "2026-11-04T16:05:11Z",
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T16:05:10Z web_request src_ip=10.10.9.50 user_agent=Nessus  # MOCK line, rebuilt from fields",
+    "raw": "10.10.9.50 - - [04/Nov/2026:21:05:10 +0500] \"GET / HTTP/1.1\" 200 14520 \"-\" \"Nessus-Scanner/10.6\"",
     "fields": {
      "src_ip": "10.10.9.50",
      "user_agent": "Nessus"
@@ -1683,10 +1683,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T16:05:11Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 13,
     "row": null,
-    "raw": "2026-11-04T16:05:11Z web_request src_ip=10.10.9.50 user_agent=Nessus  # MOCK line, rebuilt from fields",
+    "raw": "10.10.9.50 - - [04/Nov/2026:21:05:11 +0500] \"GET /admin HTTP/1.1\" 404 196 \"-\" \"Nessus-Scanner/10.6\"",
     "fields": {
      "src_ip": "10.10.9.50",
      "user_agent": "Nessus"
@@ -1706,7 +1706,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T16:05:19Z firewall_session src_ip=10.10.9.50 dst_host=SRV-FS01 dst_port=445 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:20 fw-int01 ALLOW tcp 10.10.9.50:40001 -> 10.10.1.20:445 bytes_total=600 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-FS01",
@@ -1725,7 +1725,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T16:05:21Z firewall_session src_ip=10.10.9.50 dst_host=SRV-DB01 dst_port=1433 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:21 fw-int01 ALLOW tcp 10.10.9.50:40002 -> 10.10.1.30:1433 bytes_total=480 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-DB01",
@@ -1744,7 +1744,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T16:05:23Z firewall_session src_ip=10.10.9.50 dst_host=SRV-DC01 dst_port=389 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:23 fw-int01 ALLOW tcp 10.10.9.50:40003 -> 10.10.1.5:389 bytes_total=520 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-DC01",
@@ -1763,7 +1763,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T16:05:25Z firewall_session src_ip=10.10.9.50 dst_host=SRV-WEB01 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:25 fw-int01 ALLOW tcp 10.10.9.50:40004 -> 10.10.2.10:443 bytes_total=700 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-WEB01",
@@ -1782,7 +1782,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 13,
     "row": null,
-    "raw": "2026-11-04T16:05:26Z firewall_session src_ip=10.10.9.50 dst_host=SRV-FS01 dst_port=3389 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:27 fw-int01 DENY tcp 10.10.9.50:40005 -> 10.10.1.20:3389 rule=rdp-restricted",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-FS01",
@@ -1798,7 +1798,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T16:05:29Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9006",
     "raw": "2026-11-04T16:05:29Z ids_alert alert_id=ALT-9006  # MOCK line, rebuilt from fields",
@@ -1817,7 +1817,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T17:04:22Z vpn_login user=braza assigned_ip=10.10.3.18 session=VS-20502  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T17:04:22Z vpn01 auth result=SUCCESS user=braza src_ip=39.40.88.201 geo=PK assigned_ip=10.10.3.18 session=VS-20502 mfa=push_approved",
     "fields": {
      "user": "braza",
      "assigned_ip": "10.10.3.18",
@@ -1832,10 +1832,10 @@
     "kind": "logon_rdp",
     "ts_utc": "2026-11-04T17:31:05Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T17:31:05Z logon_rdp user=braza src_ip=10.10.3.18 logon_type=10 event_id=4624  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 17:31:05 UTC | DC01 | EventID=4624 | Logon type 10 (remote desktop) | account=ORBIT\\braza | target=DC01 | client=10.10.3.18 | result=SUCCESS",
     "fields": {
      "user": "braza",
      "src_ip": "10.10.3.18",
@@ -1854,7 +1854,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 14,
     "row": null,
-    "raw": "2026-11-04T17:31:05Z firewall_session src_ip=10.10.3.18 dst_host=SRV-DC01 dst_port=3389 duration_s=3187  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 23:24:12 fw-int01 ALLOW tcp 10.10.3.18:51234 -> 10.10.1.5:3389 bytes_total=912344 duration=3187s",
     "fields": {
      "src_ip": "10.10.3.18",
      "dst_host": "SRV-DC01",
@@ -1870,10 +1870,10 @@
     "kind": "special_privileges",
     "ts_utc": "2026-11-04T17:31:09Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T17:31:09Z special_privileges user=braza event_id=4672  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 17:31:09 UTC | DC01 | EventID=4672 | Special privileges assigned | account=ORBIT\\braza",
     "fields": {
      "user": "braza",
      "event_id": 4672
@@ -1887,7 +1887,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T17:31:10Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9007",
     "raw": "2026-11-04T17:31:10Z ids_alert alert_id=ALT-9007  # MOCK line, rebuilt from fields",
@@ -1903,10 +1903,10 @@
     "kind": "logoff",
     "ts_utc": "2026-11-04T18:24:12Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 13,
     "row": null,
-    "raw": "2026-11-04T18:24:12Z logoff user=braza event_id=4634  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 18:24:12 UTC | DC01 | EventID=4634 | Logoff | account=ORBIT\\braza | target=DC01",
     "fields": {
      "user": "braza",
      "event_id": 4634
@@ -1923,7 +1923,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T18:40:10Z vpn_session_end user=braza session=VS-20502  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T18:40:10Z vpn01 session_end session=VS-20502 user=braza duration=5748s bytes_to_client=9120331 bytes_from_client=3310022",
     "fields": {
      "user": "braza",
      "session": "VS-20502"
@@ -1941,31 +1941,31 @@
     "reason": "Device rebooted for a firmware update. Nothing closing between 11:32:00 and 12:28:59 PKT is recorded. The 06:42:17 password reset has no firewall record for this reason.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Internal firewall"
      }
     ]
    },
    {
-    "source": "12_dc_security_log.md",
+    "source": "12_windows_dc_auth_log.md",
     "from_utc": "2026-11-04T00:00:00Z",
     "to_utc": "2026-11-04T03:00:00Z",
     "reason": "DC log covers 03:00 to 19:00 UTC only. Nothing is known about DC activity at utariq's 02:58:41 VPN login.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Domain controller"
      }
     ]
    },
    {
-    "source": "19_dhcp_log.md",
+    "source": "19_dhcp_lease_log.md",
     "from_utc": "2026-11-04T00:00:00Z",
     "to_utc": "2026-11-04T23:59:59Z",
     "reason": "DHCP covers the office network only. VPN pool addresses have no lease lines.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "DHCP"
      }
     ]
@@ -1977,7 +1977,7 @@
     "reason": "Not collected. Which files were read on SRV-FS01 cannot be known.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-FS01 file audit"
      }
     ]
@@ -1989,7 +1989,7 @@
     "reason": "Not forwarded. Whether any rows were read on SRV-DB01 cannot be known.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-DB01"
      }
     ]
@@ -2001,7 +2001,7 @@
     "reason": "Not collected. Link clicks by other paths cannot be checked.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Web proxy"
      }
     ]
@@ -2013,7 +2013,7 @@
     "reason": "Not collected. Whether LT-FIN-014 has malware cannot be known.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "EDR"
      }
     ]
@@ -2025,7 +2025,7 @@
     "reason": "The data covers 2026-11-04 only. Questions about other dates return not enough evidence in the logs.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Date range"
      }
     ]
@@ -2045,7 +2045,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T02:58:41Z vpn_login user=utariq src_ip=182.180.44.12 country=PK assigned_ip=10.10.3.12 session=VS-20411 result=success  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T02:58:41Z vpn01 auth result=SUCCESS user=utariq src_ip=182.180.44.12 geo=PK assigned_ip=10.10.3.12 session=VS-20411 mfa=push_approved",
     "fields": {
      "user": "utariq",
      "src_ip": "182.180.44.12",
@@ -2066,7 +2066,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:10:05Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=22 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:05 fw-edge01 DENY tcp 192.0.2.88:51522 -> 203.0.113.10:22 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -2085,7 +2085,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:10:08Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=23 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:07 fw-edge01 DENY tcp 192.0.2.88:51523 -> 203.0.113.10:23 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -2104,7 +2104,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T03:10:10Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=3389 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:09 fw-edge01 DENY tcp 192.0.2.88:51524 -> 203.0.113.10:3389 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -2123,7 +2123,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T03:10:12Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=445 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:12 fw-edge01 DENY tcp 192.0.2.88:51525 -> 203.0.113.10:445 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -2142,7 +2142,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T03:10:15Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=8080 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:15 fw-edge01 DENY tcp 192.0.2.88:51526 -> 203.0.113.10:8080 rule=default-deny",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -2161,7 +2161,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T03:10:21Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=443 action=ALLOW bytes=1850  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:10:21 fw-edge01 ALLOW tcp 192.0.2.88:51530 -> 203.0.113.10:443 rule=web-public bytes=1850",
     "fields": {
      "src_ip": "192.0.2.88",
      "dst_ip": "203.0.113.10",
@@ -2178,10 +2178,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T03:10:21Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:10:21Z web_request src_ip=192.0.2.88 method=GET url=/admin status=404  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.88 - - [04/Nov/2026:08:10:21 +0500] \"GET /admin HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
     "fields": {
      "src_ip": "192.0.2.88",
      "method": "GET",
@@ -2200,7 +2200,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T03:10:22Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9001",
     "raw": "2026-11-04T03:10:22Z ids_alert alert_id=ALT-9001  # MOCK line, rebuilt from fields",
@@ -2216,10 +2216,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T03:10:23Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:10:23Z web_request src_ip=192.0.2.88 method=GET url=/phpmyadmin/ status=404  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.88 - - [04/Nov/2026:08:10:23 +0500] \"GET /phpmyadmin/ HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
     "fields": {
      "src_ip": "192.0.2.88",
      "method": "GET",
@@ -2238,10 +2238,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T03:10:25Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T03:10:25Z web_request src_ip=192.0.2.88 method=GET url=/.env status=404  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.88 - - [04/Nov/2026:08:10:25 +0500] \"GET /.env HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
     "fields": {
      "src_ip": "192.0.2.88",
      "method": "GET",
@@ -2260,10 +2260,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T03:20:11Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:20:11Z dhcp_lease host=LT-IT-003 ip=10.20.9.3  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 08:20:11 +05:00 DHCPACK ip=10.20.9.3 mac=3c:52:82:aa:03:0b hostname=LT-IT-003 lease=8h",
     "fields": {
      "host": "LT-IT-003",
      "ip": "10.20.9.3"
@@ -2280,7 +2280,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:41:09Z vpn_login user=braza src_ip=39.40.88.201 country=PK assigned_ip=10.10.3.18 session=VS-20415 result=success  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T03:41:09Z vpn01 auth result=SUCCESS user=braza src_ip=39.40.88.201 geo=PK assigned_ip=10.10.3.18 session=VS-20415 mfa=push_approved",
     "fields": {
      "user": "braza",
      "src_ip": "39.40.88.201",
@@ -2301,7 +2301,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T03:55:00Z firewall_session src_ip=10.20.5.22 dst_ip=142.250.185.46 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:55:00 fw-edge01 ALLOW tcp 10.20.5.22:50711 -> 142.250.185.46:443 rule=outbound-web bytes=88231",
     "fields": {
      "src_ip": "10.20.5.22",
      "dst_ip": "142.250.185.46",
@@ -2317,10 +2317,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T03:57:40Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T03:57:40Z dhcp_lease host=LT-FIN-014 ip=10.20.5.14  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 08:57:40 +05:00 DHCPACK ip=10.20.5.14 mac=3c:52:82:aa:14:0e hostname=LT-FIN-014 lease=8h",
     "fields": {
      "host": "LT-FIN-014",
      "ip": "10.20.5.14"
@@ -2334,10 +2334,10 @@
     "kind": "kerberos_tgt",
     "ts_utc": "2026-11-04T03:58:02Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T03:58:02Z kerberos_tgt user=amalik workstation=LT-FIN-014 event_id=4768  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 03:58:02 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "workstation": "LT-FIN-014",
@@ -2352,10 +2352,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T03:58:03Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T03:58:03Z dhcp_lease host=LT-FIN-022 ip=10.20.5.22  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 08:58:03 +05:00 DHCPACK ip=10.20.5.22 mac=3c:52:82:aa:22:1c hostname=LT-FIN-022 lease=8h",
     "fields": {
      "host": "LT-FIN-022",
      "ip": "10.20.5.22"
@@ -2369,10 +2369,10 @@
     "kind": "dhcp_lease",
     "ts_utc": "2026-11-04T04:01:15Z",
     "ts_end_utc": null,
-    "source_file": "19_dhcp_log.md",
+    "source_file": "19_dhcp_lease_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T04:01:15Z dhcp_lease host=LT-WH-021 ip=10.20.7.8  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 09:01:15 +05:00 DHCPACK ip=10.20.7.8 mac=3c:52:82:aa:21:07 hostname=LT-WH-021 lease=8h",
     "fields": {
      "host": "LT-WH-021",
      "ip": "10.20.7.8"
@@ -2389,7 +2389,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 1,
     "row": null,
-    "raw": "2026-11-04T04:10:32Z firewall_session src_ip=10.20.5.14 dst_ip=10.10.1.20 dst_port=445 bytes=1204551  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 09:15:44 fw-int01 ALLOW tcp 10.20.5.14:51002 -> 10.10.1.20:445 bytes_total=1204551 duration=312s",
     "fields": {
      "src_ip": "10.20.5.14",
      "dst_ip": "10.10.1.20",
@@ -2408,7 +2408,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T04:12:07Z email_delivered msg_id=M-55187 recipient=amalik sender_domain=orbit-logistlcs.example spf=fail score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 09:12:07 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=amalik@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
     "fields": {
      "msg_id": "M-55187",
      "recipient": "amalik",
@@ -2432,7 +2432,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T04:12:07Z email_delivered msg_id=M-55187 recipient=sraheel score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 09:12:07 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=sraheel@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
     "fields": {
      "msg_id": "M-55187",
      "recipient": "sraheel",
@@ -2454,7 +2454,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T04:12:08Z email_delivered msg_id=M-55187 recipient=utariq score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 09:12:08 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=utariq@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
     "fields": {
      "msg_id": "M-55187",
      "recipient": "utariq",
@@ -2473,10 +2473,10 @@
     "kind": "kerberos_tgt",
     "ts_utc": "2026-11-04T04:15:44Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T04:15:44Z kerberos_tgt user=utariq workstation=LT-WH-021 event_id=4768  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 04:15:44 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\utariq | client=10.20.7.8 | workstation=LT-WH-021 | result=SUCCESS",
     "fields": {
      "user": "utariq",
      "workstation": "LT-WH-021",
@@ -2494,7 +2494,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T04:19:40Z firewall_session src_ip=10.20.5.14 dst_ip=198.51.100.77 dst_port=443 action=ALLOW bytes=18442  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 04:19:40 fw-edge01 ALLOW tcp 10.20.5.14:50833 -> 198.51.100.77:443 rule=outbound-web bytes=18442",
     "fields": {
      "src_ip": "10.20.5.14",
      "dst_ip": "198.51.100.77",
@@ -2511,7 +2511,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T04:19:41Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9002",
     "raw": "2026-11-04T04:19:41Z ids_alert alert_id=ALT-9002  # MOCK line, rebuilt from fields",
@@ -2530,7 +2530,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T04:20:15Z firewall_session src_ip=10.20.7.8 dst_ip=151.101.65.69 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 04:20:15 fw-edge01 ALLOW tcp 10.20.7.8:50901 -> 151.101.65.69:443 rule=outbound-web bytes=412",
     "fields": {
      "src_ip": "10.20.7.8",
      "dst_ip": "151.101.65.69",
@@ -2549,7 +2549,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 2,
     "row": null,
-    "raw": "2026-11-04T04:47:49Z firewall_session src_ip=10.20.7.8 dst_port=443  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 09:48:03 fw-int01 ALLOW tcp 10.20.7.8:50214 -> 10.10.2.10:443 bytes_total=88120 duration=14s",
     "fields": {
      "src_ip": "10.20.7.8",
      "dst_port": 443
@@ -2566,7 +2566,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T05:46:50Z firewall_session src_ip=198.51.100.77 dst_ip=203.0.113.20 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:46:50 fw-edge01 ALLOW tcp 198.51.100.77:60021 -> 203.0.113.20:443 rule=vpn-gateway bytes=5120",
     "fields": {
      "src_ip": "198.51.100.77",
      "dst_ip": "203.0.113.20",
@@ -2585,7 +2585,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T05:46:58Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:46:58Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -2604,7 +2604,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T05:47:31Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:47:31Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -2623,7 +2623,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T05:48:02Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_timeout  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:48:02Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_timeout",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -2642,7 +2642,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T05:48:40Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:48:40Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -2661,7 +2661,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T05:49:10Z firewall_session src_ip=198.51.100.77 dst_ip=203.0.113.20 dst_port=443 action=ALLOW bytes=9250112  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:49:10 fw-edge01 ALLOW tcp 198.51.100.77:60112 -> 203.0.113.20:443 rule=vpn-gateway bytes=9250112",
     "fields": {
      "src_ip": "198.51.100.77",
      "dst_ip": "203.0.113.20",
@@ -2681,7 +2681,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T05:49:12Z vpn_login user=amalik src_ip=198.51.100.77 country=RO assigned_ip=10.10.3.45 session=VS-20433 result=success  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T05:49:12Z vpn01 auth result=SUCCESS user=amalik src_ip=198.51.100.77 geo=RO assigned_ip=10.10.3.45 session=VS-20433 mfa=push_approved",
     "fields": {
      "user": "amalik",
      "src_ip": "198.51.100.77",
@@ -2699,7 +2699,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T05:49:13Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9003",
     "raw": "2026-11-04T05:49:13Z ids_alert alert_id=ALT-9003  # MOCK line, rebuilt from fields",
@@ -2715,10 +2715,10 @@
     "kind": "kerberos_tgt",
     "ts_utc": "2026-11-04T05:55:31Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T05:55:31Z kerberos_tgt user=amalik src_ip=10.10.3.45 workstation=unknown event_id=4768  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:55:31 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\amalik | client=10.10.3.45 | workstation=unknown | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "src_ip": "10.10.3.45",
@@ -2737,7 +2737,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 3,
     "row": null,
-    "raw": "2026-11-04T05:55:32Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.10 dst_port=88  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 10:55:34 fw-int01 ALLOW tcp 10.10.3.45:49801 -> 10.10.1.5:88 bytes_total=3312 duration=2s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.10",
@@ -2752,10 +2752,10 @@
     "kind": "kerberos_service_ticket",
     "ts_utc": "2026-11-04T05:55:33Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T05:55:33Z kerberos_service_ticket user=amalik spn=cifs/FS01.orbit.local event_id=4769  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:55:33 UTC | DC01 | EventID=4769 | Kerberos service ticket | account=ORBIT\\amalik | service=cifs/FS01.orbit.local | client=10.10.3.45 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "spn": "cifs/FS01.orbit.local",
@@ -2773,7 +2773,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 4,
     "row": null,
-    "raw": "2026-11-04T05:55:34Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.20 dst_port=445 bytes=4096  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 10:55:41 fw-int01 ALLOW tcp 10.10.3.45:49805 -> 10.10.1.20:445 bytes_total=4096 duration=7s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.20",
@@ -2789,10 +2789,10 @@
     "kind": "kerberos_service_ticket",
     "ts_utc": "2026-11-04T05:58:44Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T05:58:44Z kerberos_service_ticket user=amalik spn=MSSQLSvc/DB01.orbit.local:1433 event_id=4769  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 05:58:44 UTC | DC01 | EventID=4769 | Kerberos service ticket | account=ORBIT\\amalik | service=MSSQLSvc/DB01.orbit.local:1433 | client=10.10.3.45 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "spn": "MSSQLSvc/DB01.orbit.local:1433",
@@ -2810,7 +2810,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 5,
     "row": null,
-    "raw": "2026-11-04T05:58:44Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.30 dst_port=1433 bytes=1240 duration_s=8  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 10:58:52 fw-int01 ALLOW tcp 10.10.3.45:49830 -> 10.10.1.30:1433 bytes_total=1240 duration=8s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.30",
@@ -2830,7 +2830,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:03:12Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.20 dst_port=445 bytes_server_to_client=2411724800 duration_s=1087  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 11:21:19 fw-int01 ALLOW tcp 10.10.3.45:49871 -> 10.10.1.20:445 bytes_total=2426727912 bytes_server_to_client=2411724800 duration=1087s",
     "fields": {
      "src_ip": "10.10.3.45",
      "dst_ip": "10.10.1.20",
@@ -2850,7 +2850,7 @@
     "source_file": "14_firewall_perimeter_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T06:05:10Z firewall_session src_ip=192.0.2.150 dst_ip=203.0.113.10 dst_port=443 action=ALLOW bytes=96340  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 06:05:10 fw-edge01 ALLOW tcp 192.0.2.150:44120 -> 203.0.113.10:443 rule=web-public bytes=96340",
     "fields": {
      "src_ip": "192.0.2.150",
      "dst_ip": "203.0.113.10",
@@ -2867,10 +2867,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:05:12Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:05:12Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:05:12 +0500] \"GET /orders/search?id=1%27 HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -2891,7 +2891,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T06:05:13Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9004",
     "raw": "2026-11-04T06:05:13Z ids_alert alert_id=ALT-9004  # MOCK line, rebuilt from fields",
@@ -2907,10 +2907,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:05:31Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T06:05:31Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' AND 1=1-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:05:14 +0500] \"GET /orders/search?id=1%27%20OR%20%271%27%3D%271 HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -2931,10 +2931,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:05:50Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T06:05:50Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' ORDER BY 9-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:05:41 +0500] \"GET /orders/search?id=1%20ORDER%20BY%2010-- HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -2955,10 +2955,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:06:08Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T06:06:08Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' UNION SELECT ... status=200 size=48213 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:06:02 +0500] \"GET /orders/search?id=-1%20UNION%20SELECT%20NULL,username,password%20FROM%20users-- HTTP/1.1\" 200 48213 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -2979,10 +2979,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T06:06:20Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T06:06:20Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' AND SLEEP(5)-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+    "raw": "192.0.2.150 - - [04/Nov/2026:11:06:20 +0500] \"GET /orders/search?id=1;WAITFOR%20DELAY%20%270:0:5%27-- HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
     "fields": {
      "src_ip": "192.0.2.150",
      "method": "GET",
@@ -3003,7 +3003,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T06:21:20Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9005",
     "raw": "2026-11-04T06:21:20Z ids_alert alert_id=ALT-9005  # MOCK line, rebuilt from fields",
@@ -3022,7 +3022,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T06:31:10Z firewall_session src_ip=10.20.5.22 dst_ip=10.10.1.20 dst_port=445  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 11:31:50 fw-int01 ALLOW tcp 10.20.5.22:50990 -> 10.10.1.20:445 bytes_total=220118 duration=40s",
     "fields": {
      "src_ip": "10.20.5.22",
      "dst_ip": "10.10.1.20",
@@ -3037,10 +3037,10 @@
     "kind": "password_reset",
     "ts_utc": "2026-11-04T06:42:17Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:42:17Z password_reset user=amalik actor=amalik src_ip=10.10.3.45 event_id=4724  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 06:42:17 UTC | DC01 | EventID=4724 | Password reset attempt | target=ORBIT\\amalik | caller=ORBIT\\amalik | client=10.10.3.45 | result=SUCCESS",
     "fields": {
      "user": "amalik",
      "actor": "amalik",
@@ -3059,7 +3059,7 @@
     "source_file": "16_email_gateway_log.md",
     "line": 6,
     "row": null,
-    "raw": "2026-11-04T06:42:30Z email_delivered recipient=amalik  # MOCK line, rebuilt from fields",
+    "raw": "[2026-11-04 11:42:30 PKT] msgid=M-55340 from=noreply@orbitlogistics.example to=amalik@orbitlogistics.example subject=\"Your password was changed\" spf=pass dkim=pass score=0.1 action=delivered",
     "fields": {
      "recipient": "amalik"
     },
@@ -3077,7 +3077,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T07:12:44Z vpn_session_end user=amalik session=VS-20433 duration_s=5012 bytes_to_client=2418331648  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T07:12:44Z vpn01 session_end session=VS-20433 user=amalik duration=5012s bytes_to_client=2418331648 bytes_from_client=9122031",
     "fields": {
      "user": "amalik",
      "session": "VS-20433",
@@ -3093,10 +3093,10 @@
     "kind": "logon_failure",
     "ts_utc": "2026-11-04T07:31:12Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 7,
     "row": null,
-    "raw": "2026-11-04T07:31:12Z logon_failure user=amalik workstation=LT-FIN-014 event_id=4625  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 07:31:12 UTC | DC01 | EventID=4625 | Logon failed | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | reason=bad_password",
     "fields": {
      "user": "amalik",
      "workstation": "LT-FIN-014",
@@ -3111,10 +3111,10 @@
     "kind": "logon_failure",
     "ts_utc": "2026-11-04T07:31:48Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 8,
     "row": null,
-    "raw": "2026-11-04T07:31:48Z logon_failure user=amalik workstation=LT-FIN-014 event_id=4625  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 07:31:48 UTC | DC01 | EventID=4625 | Logon failed | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | reason=bad_password",
     "fields": {
      "user": "amalik",
      "workstation": "LT-FIN-014",
@@ -3129,10 +3129,10 @@
     "kind": "account_lockout",
     "ts_utc": "2026-11-04T07:32:50Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T07:32:50Z account_lockout user=amalik event_id=4740  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 07:32:50 UTC | DC01 | EventID=4740 | Account locked out | account=ORBIT\\amalik | caller=LT-FIN-014",
     "fields": {
      "user": "amalik",
      "event_id": 4740
@@ -3146,7 +3146,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T07:32:51Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9008",
     "raw": "2026-11-04T07:32:51Z ids_alert alert_id=ALT-9008  # MOCK line, rebuilt from fields",
@@ -3165,7 +3165,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T10:15:20Z vpn_session_end user=utariq session=VS-20411  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T10:15:20Z vpn01 session_end session=VS-20411 user=utariq duration=26199s bytes_to_client=88120331 bytes_from_client=4120993",
     "fields": {
      "user": "utariq",
      "session": "VS-20411"
@@ -3182,7 +3182,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T12:30:02Z vpn_session_end user=braza session=VS-20415  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T12:30:02Z vpn01 session_end session=VS-20415 user=braza duration=31733s bytes_to_client=140220019 bytes_from_client=22003811",
     "fields": {
      "user": "braza",
      "session": "VS-20415"
@@ -3196,10 +3196,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T16:05:10Z",
     "ts_end_utc": "2026-11-04T16:05:11Z",
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T16:05:10Z web_request src_ip=10.10.9.50 user_agent=Nessus  # MOCK line, rebuilt from fields",
+    "raw": "10.10.9.50 - - [04/Nov/2026:21:05:10 +0500] \"GET / HTTP/1.1\" 200 14520 \"-\" \"Nessus-Scanner/10.6\"",
     "fields": {
      "src_ip": "10.10.9.50",
      "user_agent": "Nessus"
@@ -3216,10 +3216,10 @@
     "kind": "web_request",
     "ts_utc": "2026-11-04T16:05:11Z",
     "ts_end_utc": null,
-    "source_file": "13_web_access_log.md",
+    "source_file": "13_web_server_log.md",
     "line": 13,
     "row": null,
-    "raw": "2026-11-04T16:05:11Z web_request src_ip=10.10.9.50 user_agent=Nessus  # MOCK line, rebuilt from fields",
+    "raw": "10.10.9.50 - - [04/Nov/2026:21:05:11 +0500] \"GET /admin HTTP/1.1\" 404 196 \"-\" \"Nessus-Scanner/10.6\"",
     "fields": {
      "src_ip": "10.10.9.50",
      "user_agent": "Nessus"
@@ -3239,7 +3239,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 9,
     "row": null,
-    "raw": "2026-11-04T16:05:19Z firewall_session src_ip=10.10.9.50 dst_host=SRV-FS01 dst_port=445 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:20 fw-int01 ALLOW tcp 10.10.9.50:40001 -> 10.10.1.20:445 bytes_total=600 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-FS01",
@@ -3258,7 +3258,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 10,
     "row": null,
-    "raw": "2026-11-04T16:05:21Z firewall_session src_ip=10.10.9.50 dst_host=SRV-DB01 dst_port=1433 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:21 fw-int01 ALLOW tcp 10.10.9.50:40002 -> 10.10.1.30:1433 bytes_total=480 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-DB01",
@@ -3277,7 +3277,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T16:05:23Z firewall_session src_ip=10.10.9.50 dst_host=SRV-DC01 dst_port=389 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:23 fw-int01 ALLOW tcp 10.10.9.50:40003 -> 10.10.1.5:389 bytes_total=520 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-DC01",
@@ -3296,7 +3296,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T16:05:25Z firewall_session src_ip=10.10.9.50 dst_host=SRV-WEB01 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:25 fw-int01 ALLOW tcp 10.10.9.50:40004 -> 10.10.2.10:443 bytes_total=700 duration=1s",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-WEB01",
@@ -3315,7 +3315,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 13,
     "row": null,
-    "raw": "2026-11-04T16:05:26Z firewall_session src_ip=10.10.9.50 dst_host=SRV-FS01 dst_port=3389 action=DENY  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 21:05:27 fw-int01 DENY tcp 10.10.9.50:40005 -> 10.10.1.20:3389 rule=rdp-restricted",
     "fields": {
      "src_ip": "10.10.9.50",
      "dst_host": "SRV-FS01",
@@ -3331,7 +3331,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T16:05:29Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9006",
     "raw": "2026-11-04T16:05:29Z ids_alert alert_id=ALT-9006  # MOCK line, rebuilt from fields",
@@ -3350,7 +3350,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T17:04:22Z vpn_login user=braza assigned_ip=10.10.3.18 session=VS-20502  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T17:04:22Z vpn01 auth result=SUCCESS user=braza src_ip=39.40.88.201 geo=PK assigned_ip=10.10.3.18 session=VS-20502 mfa=push_approved",
     "fields": {
      "user": "braza",
      "assigned_ip": "10.10.3.18",
@@ -3365,10 +3365,10 @@
     "kind": "logon_rdp",
     "ts_utc": "2026-11-04T17:31:05Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 11,
     "row": null,
-    "raw": "2026-11-04T17:31:05Z logon_rdp user=braza src_ip=10.10.3.18 logon_type=10 event_id=4624  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 17:31:05 UTC | DC01 | EventID=4624 | Logon type 10 (remote desktop) | account=ORBIT\\braza | target=DC01 | client=10.10.3.18 | result=SUCCESS",
     "fields": {
      "user": "braza",
      "src_ip": "10.10.3.18",
@@ -3387,7 +3387,7 @@
     "source_file": "15_firewall_internal_log.md",
     "line": 14,
     "row": null,
-    "raw": "2026-11-04T17:31:05Z firewall_session src_ip=10.10.3.18 dst_host=SRV-DC01 dst_port=3389 duration_s=3187  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 23:24:12 fw-int01 ALLOW tcp 10.10.3.18:51234 -> 10.10.1.5:3389 bytes_total=912344 duration=3187s",
     "fields": {
      "src_ip": "10.10.3.18",
      "dst_host": "SRV-DC01",
@@ -3403,10 +3403,10 @@
     "kind": "special_privileges",
     "ts_utc": "2026-11-04T17:31:09Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T17:31:09Z special_privileges user=braza event_id=4672  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 17:31:09 UTC | DC01 | EventID=4672 | Special privileges assigned | account=ORBIT\\braza",
     "fields": {
      "user": "braza",
      "event_id": 4672
@@ -3420,7 +3420,7 @@
     "kind": "ids_alert",
     "ts_utc": "2026-11-04T17:31:10Z",
     "ts_end_utc": null,
-    "source_file": "17_ids_alerts.md",
+    "source_file": "17_ids_alert_summary.md",
     "line": null,
     "row": "ALT-9007",
     "raw": "2026-11-04T17:31:10Z ids_alert alert_id=ALT-9007  # MOCK line, rebuilt from fields",
@@ -3436,10 +3436,10 @@
     "kind": "logoff",
     "ts_utc": "2026-11-04T18:24:12Z",
     "ts_end_utc": null,
-    "source_file": "12_dc_security_log.md",
+    "source_file": "12_windows_dc_auth_log.md",
     "line": 13,
     "row": null,
-    "raw": "2026-11-04T18:24:12Z logoff user=braza event_id=4634  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04 18:24:12 UTC | DC01 | EventID=4634 | Logoff | account=ORBIT\\braza | target=DC01",
     "fields": {
      "user": "braza",
      "event_id": 4634
@@ -3456,7 +3456,7 @@
     "source_file": "11_vpn_auth_log.md",
     "line": 12,
     "row": null,
-    "raw": "2026-11-04T18:40:10Z vpn_session_end user=braza session=VS-20502  # MOCK line, rebuilt from fields",
+    "raw": "2026-11-04T18:40:10Z vpn01 session_end session=VS-20502 user=braza duration=5748s bytes_to_client=9120331 bytes_from_client=3310022",
     "fields": {
      "user": "braza",
      "session": "VS-20502"
@@ -3474,31 +3474,31 @@
     "reason": "Device rebooted for a firmware update. Nothing closing between 11:32:00 and 12:28:59 PKT is recorded. The 06:42:17 password reset has no firewall record for this reason.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Internal firewall"
      }
     ]
    },
    {
-    "source": "12_dc_security_log.md",
+    "source": "12_windows_dc_auth_log.md",
     "from_utc": "2026-11-04T00:00:00Z",
     "to_utc": "2026-11-04T03:00:00Z",
     "reason": "DC log covers 03:00 to 19:00 UTC only. Nothing is known about DC activity at utariq's 02:58:41 VPN login.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Domain controller"
      }
     ]
    },
    {
-    "source": "19_dhcp_log.md",
+    "source": "19_dhcp_lease_log.md",
     "from_utc": "2026-11-04T00:00:00Z",
     "to_utc": "2026-11-04T23:59:59Z",
     "reason": "DHCP covers the office network only. VPN pool addresses have no lease lines.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "DHCP"
      }
     ]
@@ -3510,7 +3510,7 @@
     "reason": "Not collected. Which files were read on SRV-FS01 cannot be known.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-FS01 file audit"
      }
     ]
@@ -3522,7 +3522,7 @@
     "reason": "Not forwarded. Whether any rows were read on SRV-DB01 cannot be known.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-DB01"
      }
     ]
@@ -3534,7 +3534,7 @@
     "reason": "Not collected. Link clicks by other paths cannot be checked.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Web proxy"
      }
     ]
@@ -3546,7 +3546,7 @@
     "reason": "Not collected. Whether LT-FIN-014 has malware cannot be known.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "EDR"
      }
     ]
@@ -3558,7 +3558,7 @@
     "reason": "The data covers 2026-11-04 only. Questions about other dates return not enough evidence in the logs.",
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Date range"
      }
     ]
@@ -3591,7 +3591,7 @@
       "line": 4
      },
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Email gateway"
      }
     ],
@@ -3617,7 +3617,7 @@
     ],
     "evidence": [
      {
-      "file": "19_dhcp_log.md",
+      "file": "19_dhcp_lease_log.md",
       "line": 2
      },
      {
@@ -3625,7 +3625,7 @@
       "line": 8
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9002"
      }
     ],
@@ -3669,7 +3669,7 @@
       "line": 7
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9003"
      }
     ],
@@ -3697,15 +3697,15 @@
       "line": 7
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 3
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 4
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 5
      },
      {
@@ -3750,7 +3750,7 @@
       "line": 8
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9005"
      }
     ],
@@ -3774,7 +3774,7 @@
     ],
     "evidence": [
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 6
      },
      {
@@ -3782,19 +3782,19 @@
       "line": 6
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 7
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 8
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 9
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9008"
      }
     ],
@@ -3850,7 +3850,7 @@
       "line": 8
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 1
      }
     ],
@@ -3871,7 +3871,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-FS01 file audit"
      },
      {
@@ -3897,7 +3897,7 @@
     ],
     "evidence": [
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 5
      },
      {
@@ -3905,7 +3905,7 @@
       "line": 5
      },
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-DB01"
      }
     ],
@@ -3927,7 +3927,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Internal firewall"
      },
      {
@@ -3951,7 +3951,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "EDR"
      }
     ],
@@ -3976,7 +3976,7 @@
       "line": 8
      },
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Web proxy"
      }
     ],
@@ -3998,27 +3998,27 @@
     ],
     "evidence": [
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 6
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 7
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 8
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 9
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 10
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9004"
      }
     ],
@@ -4041,15 +4041,15 @@
     ],
     "evidence": [
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 9
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 6
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9004"
      }
     ],
@@ -4070,7 +4070,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "SRV-DB01"
      }
     ],
@@ -4117,19 +4117,19 @@
       "line": 6
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 1
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 2
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 3
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9001"
      }
     ],
@@ -4160,7 +4160,7 @@
       "line": 9
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 2
      }
     ],
@@ -4190,7 +4190,7 @@
       "line": 4
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 2
      }
     ],
@@ -4211,7 +4211,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Domain controller"
      }
     ],
@@ -4239,7 +4239,7 @@
       "row": "CHG-2026-1104-02"
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 12
      },
      {
@@ -4247,7 +4247,7 @@
       "line": 9
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9006"
      }
     ],
@@ -4275,7 +4275,7 @@
       "row": "CHG-2026-1104-03"
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 11
      },
      {
@@ -4283,7 +4283,7 @@
       "line": 14
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9007"
      }
     ],
@@ -4702,7 +4702,7 @@
       "step": 1,
       "text": "No approved scan matches 192.0.2.88.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 1
       }
@@ -4712,7 +4712,7 @@
       "step": 3,
       "text": "Block 192.0.2.88.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 3
       }
@@ -4722,7 +4722,7 @@
       "step": 5,
       "text": "Only 443 answered and no logins followed.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 5
       }
@@ -4732,7 +4732,7 @@
       "step": 6,
       "text": "Close out per the runbook (ticket only).",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 6
       }
@@ -4769,7 +4769,7 @@
       "row": "CHG-2026-1104-02"
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 12
      },
      {
@@ -4777,7 +4777,7 @@
       "line": 9
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9006"
      }
     ],
@@ -4799,7 +4799,7 @@
       "row": "CHG-2026-1104-03"
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 11
      },
      {
@@ -4807,7 +4807,7 @@
       "line": 14
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9007"
      }
     ],
@@ -4856,7 +4856,7 @@
       "line": 9
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 2
      }
     ],
@@ -4886,7 +4886,7 @@
       "line": 4
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 2
      }
     ],
@@ -4907,7 +4907,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Domain controller"
      }
     ],
@@ -5010,7 +5010,7 @@
         "row": "amalik"
        },
        {
-        "file": "19_dhcp_log.md",
+        "file": "19_dhcp_lease_log.md",
         "line": 2
        }
       ]
@@ -5032,7 +5032,7 @@
       "assumption": null,
       "evidence": [
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9002"
        }
       ]
@@ -5093,7 +5093,7 @@
       "source_file": "16_email_gateway_log.md",
       "line": 2,
       "row": null,
-      "raw": "2026-11-04T04:12:07Z email_delivered msg_id=M-55187 recipient=amalik sender_domain=orbit-logistlcs.example spf=fail score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+      "raw": "[2026-11-04 09:12:07 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=amalik@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
       "fields": {
        "msg_id": "M-55187",
        "recipient": "amalik",
@@ -5117,7 +5117,7 @@
       "source_file": "16_email_gateway_log.md",
       "line": 3,
       "row": null,
-      "raw": "2026-11-04T04:12:07Z email_delivered msg_id=M-55187 recipient=sraheel score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+      "raw": "[2026-11-04 09:12:07 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=sraheel@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
       "fields": {
        "msg_id": "M-55187",
        "recipient": "sraheel",
@@ -5139,7 +5139,7 @@
       "source_file": "16_email_gateway_log.md",
       "line": 4,
       "row": null,
-      "raw": "2026-11-04T04:12:08Z email_delivered msg_id=M-55187 recipient=utariq score=6.2 action=delivered  # MOCK line, rebuilt from fields",
+      "raw": "[2026-11-04 09:12:08 PKT] msgid=M-55187 from=payroll-update@orbit-logistlcs.example to=utariq@orbitlogistics.example subject=\"Action required: payroll verification\" url_host=orbit-payroll-verify.example spf=fail dkim=none score=6.2 action=delivered",
       "fields": {
        "msg_id": "M-55187",
        "recipient": "utariq",
@@ -5161,7 +5161,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 8,
       "row": null,
-      "raw": "2026-11-04T04:19:40Z firewall_session src_ip=10.20.5.14 dst_ip=198.51.100.77 dst_port=443 action=ALLOW bytes=18442  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 04:19:40 fw-edge01 ALLOW tcp 10.20.5.14:50833 -> 198.51.100.77:443 rule=outbound-web bytes=18442",
       "fields": {
        "src_ip": "10.20.5.14",
        "dst_ip": "198.51.100.77",
@@ -5178,7 +5178,7 @@
       "kind": "ids_alert",
       "ts_utc": "2026-11-04T04:19:41Z",
       "ts_end_utc": null,
-      "source_file": "17_ids_alerts.md",
+      "source_file": "17_ids_alert_summary.md",
       "line": null,
       "row": "ALT-9002",
       "raw": "2026-11-04T04:19:41Z ids_alert alert_id=ALT-9002  # MOCK line, rebuilt from fields",
@@ -5197,7 +5197,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 10,
       "row": null,
-      "raw": "2026-11-04T05:46:50Z firewall_session src_ip=198.51.100.77 dst_ip=203.0.113.20 dst_port=443 action=ALLOW  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 05:46:50 fw-edge01 ALLOW tcp 198.51.100.77:60021 -> 203.0.113.20:443 rule=vpn-gateway bytes=5120",
       "fields": {
        "src_ip": "198.51.100.77",
        "dst_ip": "203.0.113.20",
@@ -5216,7 +5216,7 @@
       "source_file": "11_vpn_auth_log.md",
       "line": 3,
       "row": null,
-      "raw": "2026-11-04T05:46:58Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04T05:46:58Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
       "fields": {
        "user": "amalik",
        "src_ip": "198.51.100.77",
@@ -5235,7 +5235,7 @@
       "source_file": "11_vpn_auth_log.md",
       "line": 4,
       "row": null,
-      "raw": "2026-11-04T05:47:31Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04T05:47:31Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
       "fields": {
        "user": "amalik",
        "src_ip": "198.51.100.77",
@@ -5254,7 +5254,7 @@
       "source_file": "11_vpn_auth_log.md",
       "line": 5,
       "row": null,
-      "raw": "2026-11-04T05:48:02Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_timeout  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04T05:48:02Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_timeout",
       "fields": {
        "user": "amalik",
        "src_ip": "198.51.100.77",
@@ -5273,7 +5273,7 @@
       "source_file": "11_vpn_auth_log.md",
       "line": 6,
       "row": null,
-      "raw": "2026-11-04T05:48:40Z vpn_login user=amalik src_ip=198.51.100.77 country=RO result=mfa_denied  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04T05:48:40Z vpn01 auth result=FAIL user=amalik src_ip=198.51.100.77 geo=RO reason=mfa_push_denied",
       "fields": {
        "user": "amalik",
        "src_ip": "198.51.100.77",
@@ -5292,7 +5292,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 11,
       "row": null,
-      "raw": "2026-11-04T05:49:10Z firewall_session src_ip=198.51.100.77 dst_ip=203.0.113.20 dst_port=443 action=ALLOW bytes=9250112  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 05:49:10 fw-edge01 ALLOW tcp 198.51.100.77:60112 -> 203.0.113.20:443 rule=vpn-gateway bytes=9250112",
       "fields": {
        "src_ip": "198.51.100.77",
        "dst_ip": "203.0.113.20",
@@ -5312,7 +5312,7 @@
       "source_file": "11_vpn_auth_log.md",
       "line": 7,
       "row": null,
-      "raw": "2026-11-04T05:49:12Z vpn_login user=amalik src_ip=198.51.100.77 country=RO assigned_ip=10.10.3.45 session=VS-20433 result=success  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04T05:49:12Z vpn01 auth result=SUCCESS user=amalik src_ip=198.51.100.77 geo=RO assigned_ip=10.10.3.45 session=VS-20433 mfa=push_approved",
       "fields": {
        "user": "amalik",
        "src_ip": "198.51.100.77",
@@ -5330,7 +5330,7 @@
       "kind": "ids_alert",
       "ts_utc": "2026-11-04T05:49:13Z",
       "ts_end_utc": null,
-      "source_file": "17_ids_alerts.md",
+      "source_file": "17_ids_alert_summary.md",
       "line": null,
       "row": "ALT-9003",
       "raw": "2026-11-04T05:49:13Z ids_alert alert_id=ALT-9003  # MOCK line, rebuilt from fields",
@@ -5346,10 +5346,10 @@
       "kind": "kerberos_tgt",
       "ts_utc": "2026-11-04T05:55:31Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 3,
       "row": null,
-      "raw": "2026-11-04T05:55:31Z kerberos_tgt user=amalik src_ip=10.10.3.45 workstation=unknown event_id=4768  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 05:55:31 UTC | DC01 | EventID=4768 | Kerberos TGT request | account=ORBIT\\amalik | client=10.10.3.45 | workstation=unknown | result=SUCCESS",
       "fields": {
        "user": "amalik",
        "src_ip": "10.10.3.45",
@@ -5368,7 +5368,7 @@
       "source_file": "15_firewall_internal_log.md",
       "line": 3,
       "row": null,
-      "raw": "2026-11-04T05:55:32Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.10 dst_port=88  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 10:55:34 fw-int01 ALLOW tcp 10.10.3.45:49801 -> 10.10.1.5:88 bytes_total=3312 duration=2s",
       "fields": {
        "src_ip": "10.10.3.45",
        "dst_ip": "10.10.1.10",
@@ -5383,10 +5383,10 @@
       "kind": "kerberos_service_ticket",
       "ts_utc": "2026-11-04T05:55:33Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 4,
       "row": null,
-      "raw": "2026-11-04T05:55:33Z kerberos_service_ticket user=amalik spn=cifs/FS01.orbit.local event_id=4769  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 05:55:33 UTC | DC01 | EventID=4769 | Kerberos service ticket | account=ORBIT\\amalik | service=cifs/FS01.orbit.local | client=10.10.3.45 | result=SUCCESS",
       "fields": {
        "user": "amalik",
        "spn": "cifs/FS01.orbit.local",
@@ -5404,7 +5404,7 @@
       "source_file": "15_firewall_internal_log.md",
       "line": 4,
       "row": null,
-      "raw": "2026-11-04T05:55:34Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.20 dst_port=445 bytes=4096  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 10:55:41 fw-int01 ALLOW tcp 10.10.3.45:49805 -> 10.10.1.20:445 bytes_total=4096 duration=7s",
       "fields": {
        "src_ip": "10.10.3.45",
        "dst_ip": "10.10.1.20",
@@ -5420,10 +5420,10 @@
       "kind": "kerberos_service_ticket",
       "ts_utc": "2026-11-04T05:58:44Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 5,
       "row": null,
-      "raw": "2026-11-04T05:58:44Z kerberos_service_ticket user=amalik spn=MSSQLSvc/DB01.orbit.local:1433 event_id=4769  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 05:58:44 UTC | DC01 | EventID=4769 | Kerberos service ticket | account=ORBIT\\amalik | service=MSSQLSvc/DB01.orbit.local:1433 | client=10.10.3.45 | result=SUCCESS",
       "fields": {
        "user": "amalik",
        "spn": "MSSQLSvc/DB01.orbit.local:1433",
@@ -5441,7 +5441,7 @@
       "source_file": "15_firewall_internal_log.md",
       "line": 5,
       "row": null,
-      "raw": "2026-11-04T05:58:44Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.30 dst_port=1433 bytes=1240 duration_s=8  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 10:58:52 fw-int01 ALLOW tcp 10.10.3.45:49830 -> 10.10.1.30:1433 bytes_total=1240 duration=8s",
       "fields": {
        "src_ip": "10.10.3.45",
        "dst_ip": "10.10.1.30",
@@ -5461,7 +5461,7 @@
       "source_file": "15_firewall_internal_log.md",
       "line": 6,
       "row": null,
-      "raw": "2026-11-04T06:03:12Z firewall_session src_ip=10.10.3.45 dst_ip=10.10.1.20 dst_port=445 bytes_server_to_client=2411724800 duration_s=1087  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 11:21:19 fw-int01 ALLOW tcp 10.10.3.45:49871 -> 10.10.1.20:445 bytes_total=2426727912 bytes_server_to_client=2411724800 duration=1087s",
       "fields": {
        "src_ip": "10.10.3.45",
        "dst_ip": "10.10.1.20",
@@ -5478,7 +5478,7 @@
       "kind": "ids_alert",
       "ts_utc": "2026-11-04T06:21:20Z",
       "ts_end_utc": null,
-      "source_file": "17_ids_alerts.md",
+      "source_file": "17_ids_alert_summary.md",
       "line": null,
       "row": "ALT-9005",
       "raw": "2026-11-04T06:21:20Z ids_alert alert_id=ALT-9005  # MOCK line, rebuilt from fields",
@@ -5494,10 +5494,10 @@
       "kind": "password_reset",
       "ts_utc": "2026-11-04T06:42:17Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 6,
       "row": null,
-      "raw": "2026-11-04T06:42:17Z password_reset user=amalik actor=amalik src_ip=10.10.3.45 event_id=4724  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 06:42:17 UTC | DC01 | EventID=4724 | Password reset attempt | target=ORBIT\\amalik | caller=ORBIT\\amalik | client=10.10.3.45 | result=SUCCESS",
       "fields": {
        "user": "amalik",
        "actor": "amalik",
@@ -5516,7 +5516,7 @@
       "source_file": "16_email_gateway_log.md",
       "line": 6,
       "row": null,
-      "raw": "2026-11-04T06:42:30Z email_delivered recipient=amalik  # MOCK line, rebuilt from fields",
+      "raw": "[2026-11-04 11:42:30 PKT] msgid=M-55340 from=noreply@orbitlogistics.example to=amalik@orbitlogistics.example subject=\"Your password was changed\" spf=pass dkim=pass score=0.1 action=delivered",
       "fields": {
        "recipient": "amalik"
       },
@@ -5534,7 +5534,7 @@
       "source_file": "11_vpn_auth_log.md",
       "line": 8,
       "row": null,
-      "raw": "2026-11-04T07:12:44Z vpn_session_end user=amalik session=VS-20433 duration_s=5012 bytes_to_client=2418331648  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04T07:12:44Z vpn01 session_end session=VS-20433 user=amalik duration=5012s bytes_to_client=2418331648 bytes_from_client=9122031",
       "fields": {
        "user": "amalik",
        "session": "VS-20433",
@@ -5550,10 +5550,10 @@
       "kind": "logon_failure",
       "ts_utc": "2026-11-04T07:31:12Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 7,
       "row": null,
-      "raw": "2026-11-04T07:31:12Z logon_failure user=amalik workstation=LT-FIN-014 event_id=4625  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 07:31:12 UTC | DC01 | EventID=4625 | Logon failed | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | reason=bad_password",
       "fields": {
        "user": "amalik",
        "workstation": "LT-FIN-014",
@@ -5568,10 +5568,10 @@
       "kind": "logon_failure",
       "ts_utc": "2026-11-04T07:31:48Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 8,
       "row": null,
-      "raw": "2026-11-04T07:31:48Z logon_failure user=amalik workstation=LT-FIN-014 event_id=4625  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 07:31:48 UTC | DC01 | EventID=4625 | Logon failed | account=ORBIT\\amalik | client=10.20.5.14 | workstation=LT-FIN-014 | reason=bad_password",
       "fields": {
        "user": "amalik",
        "workstation": "LT-FIN-014",
@@ -5586,10 +5586,10 @@
       "kind": "account_lockout",
       "ts_utc": "2026-11-04T07:32:50Z",
       "ts_end_utc": null,
-      "source_file": "12_dc_security_log.md",
+      "source_file": "12_windows_dc_auth_log.md",
       "line": 9,
       "row": null,
-      "raw": "2026-11-04T07:32:50Z account_lockout user=amalik event_id=4740  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 07:32:50 UTC | DC01 | EventID=4740 | Account locked out | account=ORBIT\\amalik | caller=LT-FIN-014",
       "fields": {
        "user": "amalik",
        "event_id": 4740
@@ -5603,7 +5603,7 @@
       "kind": "ids_alert",
       "ts_utc": "2026-11-04T07:32:51Z",
       "ts_end_utc": null,
-      "source_file": "17_ids_alerts.md",
+      "source_file": "17_ids_alert_summary.md",
       "line": null,
       "row": "ALT-9008",
       "raw": "2026-11-04T07:32:51Z ids_alert alert_id=ALT-9008  # MOCK line, rebuilt from fields",
@@ -5685,7 +5685,7 @@
         "line": 4
        },
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Email gateway"
        }
       ],
@@ -5711,7 +5711,7 @@
       ],
       "evidence": [
        {
-        "file": "19_dhcp_log.md",
+        "file": "19_dhcp_lease_log.md",
         "line": 2
        },
        {
@@ -5719,7 +5719,7 @@
         "line": 8
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9002"
        }
       ],
@@ -5763,7 +5763,7 @@
         "line": 7
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9003"
        }
       ],
@@ -5791,15 +5791,15 @@
         "line": 7
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 3
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 4
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 5
        },
        {
@@ -5844,7 +5844,7 @@
         "line": 8
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9005"
        }
       ],
@@ -5868,7 +5868,7 @@
       ],
       "evidence": [
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 6
        },
        {
@@ -5876,19 +5876,19 @@
         "line": 6
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 7
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 8
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 9
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9008"
        }
       ],
@@ -5946,7 +5946,7 @@
         "line": 8
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 1
        }
       ],
@@ -5969,7 +5969,7 @@
       ],
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "SRV-FS01 file audit"
        },
        {
@@ -5995,7 +5995,7 @@
       ],
       "evidence": [
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 5
        },
        {
@@ -6003,7 +6003,7 @@
         "line": 5
        },
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "SRV-DB01"
        }
       ],
@@ -6025,7 +6025,7 @@
       ],
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Internal firewall"
        },
        {
@@ -6049,7 +6049,7 @@
       ],
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "EDR"
        }
       ],
@@ -6074,7 +6074,7 @@
         "line": 8
        },
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Web proxy"
        }
       ],
@@ -6092,31 +6092,31 @@
       "reason": "Device rebooted for a firmware update. Nothing closing between 11:32:00 and 12:28:59 PKT is recorded. The 06:42:17 password reset has no firewall record for this reason.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Internal firewall"
        }
       ]
      },
      {
-      "source": "12_dc_security_log.md",
+      "source": "12_windows_dc_auth_log.md",
       "from_utc": "2026-11-04T00:00:00Z",
       "to_utc": "2026-11-04T03:00:00Z",
       "reason": "DC log covers 03:00 to 19:00 UTC only. Nothing is known about DC activity at utariq's 02:58:41 VPN login.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Domain controller"
        }
       ]
      },
      {
-      "source": "19_dhcp_log.md",
+      "source": "19_dhcp_lease_log.md",
       "from_utc": "2026-11-04T00:00:00Z",
       "to_utc": "2026-11-04T23:59:59Z",
       "reason": "DHCP covers the office network only. VPN pool addresses have no lease lines.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "DHCP"
        }
       ]
@@ -6128,7 +6128,7 @@
       "reason": "Not collected. Which files were read on SRV-FS01 cannot be known.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "SRV-FS01 file audit"
        }
       ]
@@ -6140,7 +6140,7 @@
       "reason": "Not forwarded. Whether any rows were read on SRV-DB01 cannot be known.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "SRV-DB01"
        }
       ]
@@ -6152,7 +6152,7 @@
       "reason": "Not collected. Link clicks by other paths cannot be checked.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Web proxy"
        }
       ]
@@ -6164,7 +6164,7 @@
       "reason": "Not collected. Whether LT-FIN-014 has malware cannot be known.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "EDR"
        }
       ]
@@ -6176,7 +6176,7 @@
       "reason": "The data covers 2026-11-04 only. Questions about other dates return not enough evidence in the logs.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "Date range"
        }
       ]
@@ -6194,7 +6194,7 @@
         "row": "CHG-2026-1104-02"
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 12
        },
        {
@@ -6202,7 +6202,7 @@
         "line": 9
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9006"
        }
       ],
@@ -6224,7 +6224,7 @@
         "row": "CHG-2026-1104-03"
        },
        {
-        "file": "12_dc_security_log.md",
+        "file": "12_windows_dc_auth_log.md",
         "line": 11
        },
        {
@@ -6232,7 +6232,7 @@
         "line": 14
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9007"
        }
       ],
@@ -6440,7 +6440,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 12,
       "row": null,
-      "raw": "2026-11-04T06:05:10Z firewall_session src_ip=192.0.2.150 dst_ip=203.0.113.10 dst_port=443 action=ALLOW bytes=96340  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 06:05:10 fw-edge01 ALLOW tcp 192.0.2.150:44120 -> 203.0.113.10:443 rule=web-public bytes=96340",
       "fields": {
        "src_ip": "192.0.2.150",
        "dst_ip": "203.0.113.10",
@@ -6457,10 +6457,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T06:05:12Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 6,
       "row": null,
-      "raw": "2026-11-04T06:05:12Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.150 - - [04/Nov/2026:11:05:12 +0500] \"GET /orders/search?id=1%27 HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
       "fields": {
        "src_ip": "192.0.2.150",
        "method": "GET",
@@ -6481,7 +6481,7 @@
       "kind": "ids_alert",
       "ts_utc": "2026-11-04T06:05:13Z",
       "ts_end_utc": null,
-      "source_file": "17_ids_alerts.md",
+      "source_file": "17_ids_alert_summary.md",
       "line": null,
       "row": "ALT-9004",
       "raw": "2026-11-04T06:05:13Z ids_alert alert_id=ALT-9004  # MOCK line, rebuilt from fields",
@@ -6497,10 +6497,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T06:05:31Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 7,
       "row": null,
-      "raw": "2026-11-04T06:05:31Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' AND 1=1-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.150 - - [04/Nov/2026:11:05:14 +0500] \"GET /orders/search?id=1%27%20OR%20%271%27%3D%271 HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
       "fields": {
        "src_ip": "192.0.2.150",
        "method": "GET",
@@ -6521,10 +6521,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T06:05:50Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 8,
       "row": null,
-      "raw": "2026-11-04T06:05:50Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' ORDER BY 9-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.150 - - [04/Nov/2026:11:05:41 +0500] \"GET /orders/search?id=1%20ORDER%20BY%2010-- HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
       "fields": {
        "src_ip": "192.0.2.150",
        "method": "GET",
@@ -6545,10 +6545,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T06:06:08Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 9,
       "row": null,
-      "raw": "2026-11-04T06:06:08Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' UNION SELECT ... status=200 size=48213 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.150 - - [04/Nov/2026:11:06:02 +0500] \"GET /orders/search?id=-1%20UNION%20SELECT%20NULL,username,password%20FROM%20users-- HTTP/1.1\" 200 48213 \"-\" \"sqlmap/1.7.2\"",
       "fields": {
        "src_ip": "192.0.2.150",
        "method": "GET",
@@ -6569,10 +6569,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T06:06:20Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 10,
       "row": null,
-      "raw": "2026-11-04T06:06:20Z web_request src_ip=192.0.2.150 method=GET url=/orders/search?q=1' AND SLEEP(5)-- status=500 size=612 user_agent=sqlmap/1.7  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.150 - - [04/Nov/2026:11:06:20 +0500] \"GET /orders/search?id=1;WAITFOR%20DELAY%20%270:0:5%27-- HTTP/1.1\" 500 612 \"-\" \"sqlmap/1.7.2\"",
       "fields": {
        "src_ip": "192.0.2.150",
        "method": "GET",
@@ -6630,27 +6630,27 @@
       ],
       "evidence": [
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 6
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 7
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 8
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 9
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 10
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9004"
        }
       ],
@@ -6675,15 +6675,15 @@
       ],
       "evidence": [
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 9
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 6
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9004"
        }
       ],
@@ -6706,7 +6706,7 @@
       ],
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "SRV-DB01"
        }
       ],
@@ -6723,7 +6723,7 @@
       "reason": "Not forwarded. Whether any rows were read on SRV-DB01 cannot be known.",
       "evidence": [
        {
-        "file": "20_log_coverage.md",
+        "file": "20_log_source_coverage.md",
         "row": "SRV-DB01"
        }
       ]
@@ -6791,7 +6791,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 1,
       "row": null,
-      "raw": "2026-11-04T03:10:05Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=22 action=DENY  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 03:10:05 fw-edge01 DENY tcp 192.0.2.88:51522 -> 203.0.113.10:22 rule=default-deny",
       "fields": {
        "src_ip": "192.0.2.88",
        "dst_ip": "203.0.113.10",
@@ -6810,7 +6810,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 2,
       "row": null,
-      "raw": "2026-11-04T03:10:08Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=23 action=DENY  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 03:10:07 fw-edge01 DENY tcp 192.0.2.88:51523 -> 203.0.113.10:23 rule=default-deny",
       "fields": {
        "src_ip": "192.0.2.88",
        "dst_ip": "203.0.113.10",
@@ -6829,7 +6829,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 3,
       "row": null,
-      "raw": "2026-11-04T03:10:10Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=3389 action=DENY  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 03:10:09 fw-edge01 DENY tcp 192.0.2.88:51524 -> 203.0.113.10:3389 rule=default-deny",
       "fields": {
        "src_ip": "192.0.2.88",
        "dst_ip": "203.0.113.10",
@@ -6848,7 +6848,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 4,
       "row": null,
-      "raw": "2026-11-04T03:10:12Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=445 action=DENY  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 03:10:12 fw-edge01 DENY tcp 192.0.2.88:51525 -> 203.0.113.10:445 rule=default-deny",
       "fields": {
        "src_ip": "192.0.2.88",
        "dst_ip": "203.0.113.10",
@@ -6867,7 +6867,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 5,
       "row": null,
-      "raw": "2026-11-04T03:10:15Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=8080 action=DENY  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 03:10:15 fw-edge01 DENY tcp 192.0.2.88:51526 -> 203.0.113.10:8080 rule=default-deny",
       "fields": {
        "src_ip": "192.0.2.88",
        "dst_ip": "203.0.113.10",
@@ -6886,7 +6886,7 @@
       "source_file": "14_firewall_perimeter_log.md",
       "line": 6,
       "row": null,
-      "raw": "2026-11-04T03:10:21Z firewall_session src_ip=192.0.2.88 dst_ip=203.0.113.10 dst_port=443 action=ALLOW bytes=1850  # MOCK line, rebuilt from fields",
+      "raw": "2026-11-04 03:10:21 fw-edge01 ALLOW tcp 192.0.2.88:51530 -> 203.0.113.10:443 rule=web-public bytes=1850",
       "fields": {
        "src_ip": "192.0.2.88",
        "dst_ip": "203.0.113.10",
@@ -6903,10 +6903,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T03:10:21Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 1,
       "row": null,
-      "raw": "2026-11-04T03:10:21Z web_request src_ip=192.0.2.88 method=GET url=/admin status=404  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.88 - - [04/Nov/2026:08:10:21 +0500] \"GET /admin HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
       "fields": {
        "src_ip": "192.0.2.88",
        "method": "GET",
@@ -6925,7 +6925,7 @@
       "kind": "ids_alert",
       "ts_utc": "2026-11-04T03:10:22Z",
       "ts_end_utc": null,
-      "source_file": "17_ids_alerts.md",
+      "source_file": "17_ids_alert_summary.md",
       "line": null,
       "row": "ALT-9001",
       "raw": "2026-11-04T03:10:22Z ids_alert alert_id=ALT-9001  # MOCK line, rebuilt from fields",
@@ -6941,10 +6941,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T03:10:23Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 2,
       "row": null,
-      "raw": "2026-11-04T03:10:23Z web_request src_ip=192.0.2.88 method=GET url=/phpmyadmin/ status=404  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.88 - - [04/Nov/2026:08:10:23 +0500] \"GET /phpmyadmin/ HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
       "fields": {
        "src_ip": "192.0.2.88",
        "method": "GET",
@@ -6963,10 +6963,10 @@
       "kind": "web_request",
       "ts_utc": "2026-11-04T03:10:25Z",
       "ts_end_utc": null,
-      "source_file": "13_web_access_log.md",
+      "source_file": "13_web_server_log.md",
       "line": 3,
       "row": null,
-      "raw": "2026-11-04T03:10:25Z web_request src_ip=192.0.2.88 method=GET url=/.env status=404  # MOCK line, rebuilt from fields",
+      "raw": "192.0.2.88 - - [04/Nov/2026:08:10:25 +0500] \"GET /.env HTTP/1.1\" 404 196 \"-\" \"Mozilla/5.0 (compatible; probe)\"",
       "fields": {
        "src_ip": "192.0.2.88",
        "method": "GET",
@@ -7047,19 +7047,19 @@
         "line": 6
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 1
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 2
        },
        {
-        "file": "13_web_access_log.md",
+        "file": "13_web_server_log.md",
         "line": 3
        },
        {
-        "file": "17_ids_alerts.md",
+        "file": "17_ids_alert_summary.md",
         "row": "ALT-9001"
        }
       ],
@@ -7079,7 +7079,7 @@
       "step": 1,
       "text": "No approved scan matches 192.0.2.88.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 1
       }
@@ -7089,7 +7089,7 @@
       "step": 3,
       "text": "Block 192.0.2.88.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 3
       }
@@ -7099,7 +7099,7 @@
       "step": 5,
       "text": "Only 443 answered and no logins followed.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 5
       }
@@ -7109,7 +7109,7 @@
       "step": 6,
       "text": "Close out per the runbook (ticket only).",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 6
       }
@@ -7148,7 +7148,7 @@
       "line": 9
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 2
      }
     ],
@@ -7178,7 +7178,7 @@
       "line": 4
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 2
      }
     ],
@@ -7199,7 +7199,7 @@
     ],
     "evidence": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Domain controller"
      }
     ],
@@ -7273,7 +7273,7 @@
          "line": 8
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9005"
         }
        ],
@@ -7299,7 +7299,7 @@
        ],
        "evidence": [
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "SRV-FS01 file audit"
         },
         {
@@ -7332,7 +7332,7 @@
       "line": 8
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9005"
      },
      {
@@ -7454,7 +7454,7 @@
        ],
        "evidence": [
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "SRV-FS01 file audit"
         },
         {
@@ -7542,7 +7542,7 @@
    }
   },
   "did the attacker read the orders database?": {
-   "answer": "Not enough evidence in the logs. Confirmed: amalik requested a ticket for MSSQLSvc/DB01.orbit.local:1433 at 05:58:44 UTC [12_dc_security_log.md L5], and 10.10.3.45 had an 8-second, 1,240-byte session to SRV-DB01:1433 [15_firewall_internal_log.md L5]. DB01 logs are not forwarded, so what was read is unknown. Separately, SQL injection on SRV-WEB01 (INC-2) may have returned rows, also not verifiable.",
+   "answer": "Not enough evidence in the logs. Confirmed: amalik requested a ticket for MSSQLSvc/DB01.orbit.local:1433 at 05:58:44 UTC [12_windows_dc_auth_log.md L5], and 10.10.3.45 had an 8-second, 1,240-byte session to SRV-DB01:1433 [15_firewall_internal_log.md L5]. DB01 logs are not forwarded, so what was read is unknown. Separately, SQL injection on SRV-WEB01 (INC-2) may have returned rows, also not verifiable.",
    "structured": {
     "labels": {
      "confirmed": [
@@ -7565,15 +7565,15 @@
          "line": 7
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 3
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 4
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 5
         },
         {
@@ -7611,15 +7611,15 @@
        ],
        "evidence": [
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 9
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 6
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9004"
         }
        ],
@@ -7644,7 +7644,7 @@
        ],
        "evidence": [
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 5
         },
         {
@@ -7652,7 +7652,7 @@
          "line": 5
         },
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "SRV-DB01"
         }
        ],
@@ -7672,7 +7672,7 @@
        ],
        "evidence": [
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "SRV-DB01"
         }
        ],
@@ -7693,7 +7693,7 @@
     ],
     "citations": [
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 5
      },
      {
@@ -7701,7 +7701,7 @@
       "line": 5
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 9
      }
     ],
@@ -7759,7 +7759,7 @@
    }
   },
   "is alt-9006 an attack? should we escalate it?": {
-   "answer": "No. ALT-9006 is closed as harmless under CHG-2026-1104-02: SCAN01 (10.10.9.50) scanned servers in 10.10.1.0/24 and 10.10.2.0/24 at 21:05 PKT. System, tool and window (21:00 to 23:00 PKT) all match [05_change_calendar.md row CHG-2026-1104-02] [17_ids_alerts.md row ALT-9006]. No escalation is needed.",
+   "answer": "No. ALT-9006 is closed as harmless under CHG-2026-1104-02: SCAN01 (10.10.9.50) scanned servers in 10.10.1.0/24 and 10.10.2.0/24 at 21:05 PKT. System, tool and window (21:00 to 23:00 PKT) all match [05_change_calendar.md row CHG-2026-1104-02] [17_ids_alert_summary.md row ALT-9006]. No escalation is needed.",
    "structured": {
     "labels": {
      "confirmed": [
@@ -7782,7 +7782,7 @@
          "row": "CHG-2026-1104-02"
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 12
         },
         {
@@ -7790,7 +7790,7 @@
          "line": 9
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9006"
         }
        ],
@@ -7811,7 +7811,7 @@
       "row": "CHG-2026-1104-02"
      },
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 12
      },
      {
@@ -7819,7 +7819,7 @@
       "line": 9
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9006"
      }
     ],
@@ -7876,7 +7876,7 @@
          "line": 7
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9003"
         }
        ],
@@ -8021,19 +8021,19 @@
          "line": 6
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 1
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 2
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 3
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9001"
         }
        ],
@@ -8063,7 +8063,7 @@
       "line": 1
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9001"
      }
     ],
@@ -8077,7 +8077,7 @@
       "step": 1,
       "text": "No approved scan matches 192.0.2.88.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 1
       }
@@ -8087,7 +8087,7 @@
       "step": 3,
       "text": "Block 192.0.2.88.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 3
       }
@@ -8097,7 +8097,7 @@
       "step": 5,
       "text": "Only 443 answered and no logins followed.",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 5
       }
@@ -8107,7 +8107,7 @@
       "step": 6,
       "text": "Close out per the runbook (ticket only).",
       "cite": {
-       "file": "10_runbook_recon_scan.md",
+       "file": "10_runbook_scanning_recon.md",
        "runbook": "RB-SCAN-05",
        "step": 6
       }
@@ -8237,7 +8237,7 @@
    }
   },
   "what happened between 06:32 and 07:12 utc?": {
-   "answer": "Not enough evidence in the logs for firewall activity: the internal firewall was in a gap from 06:32:00 to 07:28:59 UTC (firmware reboot) [20_log_coverage.md row Internal firewall]. What the logs do show: amalik's password was reset from 10.10.3.45 at 06:42:17 UTC [12_dc_security_log.md L6], a notice mail went out at 06:42:30 UTC [16_email_gateway_log.md L6], and VPN session VS-20433 ended at 07:12:44 UTC [11_vpn_auth_log.md L8].",
+   "answer": "Not enough evidence in the logs for firewall activity: the internal firewall was in a gap from 06:32:00 to 07:28:59 UTC (firmware reboot) [20_log_source_coverage.md row Internal firewall]. What the logs do show: amalik's password was reset from 10.10.3.45 at 06:42:17 UTC [12_windows_dc_auth_log.md L6], a notice mail went out at 06:42:30 UTC [16_email_gateway_log.md L6], and VPN session VS-20433 ended at 07:12:44 UTC [11_vpn_auth_log.md L8].",
    "structured": {
     "labels": {
      "confirmed": [
@@ -8255,7 +8255,7 @@
        ],
        "evidence": [
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 6
         },
         {
@@ -8263,19 +8263,19 @@
          "line": 6
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 7
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 8
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 9
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9008"
         }
        ],
@@ -8300,7 +8300,7 @@
        ],
        "evidence": [
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "Internal firewall"
         },
         {
@@ -8325,11 +8325,11 @@
     ],
     "citations": [
      {
-      "file": "20_log_coverage.md",
+      "file": "20_log_source_coverage.md",
       "row": "Internal firewall"
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 6
      },
      {
@@ -8411,7 +8411,7 @@
          "line": 8
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9005"
         }
        ],
@@ -8454,7 +8454,7 @@
    }
   },
   "is braza's remote desktop session suspicious?": {
-   "answer": "No. ALT-9007 is closed as harmless under CHG-2026-1104-03: braza's remote desktop to SRV-DC01, 22:31:05 to 23:24:12 PKT, matches system, person and window (22:00 to 23:30 PKT) [05_change_calendar.md row CHG-2026-1104-03] [12_dc_security_log.md L11] [15_firewall_internal_log.md L14].",
+   "answer": "No. ALT-9007 is closed as harmless under CHG-2026-1104-03: braza's remote desktop to SRV-DC01, 22:31:05 to 23:24:12 PKT, matches system, person and window (22:00 to 23:30 PKT) [05_change_calendar.md row CHG-2026-1104-03] [12_windows_dc_auth_log.md L11] [15_firewall_internal_log.md L14].",
    "structured": {
     "labels": {
      "confirmed": [
@@ -8477,7 +8477,7 @@
          "row": "CHG-2026-1104-03"
         },
         {
-         "file": "12_dc_security_log.md",
+         "file": "12_windows_dc_auth_log.md",
          "line": 11
         },
         {
@@ -8485,7 +8485,7 @@
          "line": 14
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9007"
         }
        ],
@@ -8507,7 +8507,7 @@
       "row": "CHG-2026-1104-03"
      },
      {
-      "file": "12_dc_security_log.md",
+      "file": "12_windows_dc_auth_log.md",
       "line": 11
      },
      {
@@ -8515,7 +8515,7 @@
       "line": 14
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9007"
      }
     ],
@@ -8534,7 +8534,7 @@
    }
   },
   "is the sql injection part of the same incident as the vpn login?": {
-   "answer": "No. INC-2 (SQL injection from 192.0.2.150) is separate from INC-1. It overlaps in time with the large transfer, but same time is not shared evidence: no shared source IP, session or account links them [13_web_access_log.md L9]. INC-2 is P2, INC-1 is P1.",
+   "answer": "No. INC-2 (SQL injection from 192.0.2.150) is separate from INC-1. It overlaps in time with the large transfer, but same time is not shared evidence: no shared source IP, session or account links them [13_web_server_log.md L9]. INC-2 is P2, INC-1 is P1.",
    "structured": {
     "labels": {
      "confirmed": [
@@ -8551,27 +8551,27 @@
        ],
        "evidence": [
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 6
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 7
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 8
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 9
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 10
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9004"
         }
        ],
@@ -8596,15 +8596,15 @@
        ],
        "evidence": [
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 9
         },
         {
-         "file": "13_web_access_log.md",
+         "file": "13_web_server_log.md",
          "line": 6
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9004"
         }
        ],
@@ -8627,7 +8627,7 @@
        ],
        "evidence": [
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "SRV-DB01"
         }
        ],
@@ -8646,7 +8646,7 @@
     ],
     "citations": [
      {
-      "file": "13_web_access_log.md",
+      "file": "13_web_server_log.md",
       "line": 9
      },
      {
@@ -8654,7 +8654,7 @@
       "line": 12
      },
      {
-      "file": "17_ids_alerts.md",
+      "file": "17_ids_alert_summary.md",
       "row": "ALT-9004"
      }
     ],
@@ -8745,7 +8745,7 @@
          "line": 8
         },
         {
-         "file": "17_ids_alerts.md",
+         "file": "17_ids_alert_summary.md",
          "row": "ALT-9005"
         }
        ],
@@ -8771,7 +8771,7 @@
        ],
        "evidence": [
         {
-         "file": "20_log_coverage.md",
+         "file": "20_log_source_coverage.md",
          "row": "SRV-FS01 file audit"
         },
         {
@@ -8892,7 +8892,7 @@
      "line": 4
     },
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "Email gateway"
     }
    ],
@@ -8918,7 +8918,7 @@
    ],
    "evidence": [
     {
-     "file": "19_dhcp_log.md",
+     "file": "19_dhcp_lease_log.md",
      "line": 2
     },
     {
@@ -8926,7 +8926,7 @@
      "line": 8
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9002"
     }
    ],
@@ -8970,7 +8970,7 @@
      "line": 7
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9003"
     }
    ],
@@ -8998,15 +8998,15 @@
      "line": 7
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 3
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 4
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 5
     },
     {
@@ -9051,7 +9051,7 @@
      "line": 8
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9005"
     }
    ],
@@ -9075,7 +9075,7 @@
    ],
    "evidence": [
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 6
     },
     {
@@ -9083,19 +9083,19 @@
      "line": 6
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 7
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 8
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 9
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9008"
     }
    ],
@@ -9151,7 +9151,7 @@
      "line": 8
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 1
     }
    ],
@@ -9172,7 +9172,7 @@
    ],
    "evidence": [
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "SRV-FS01 file audit"
     },
     {
@@ -9198,7 +9198,7 @@
    ],
    "evidence": [
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 5
     },
     {
@@ -9206,7 +9206,7 @@
      "line": 5
     },
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "SRV-DB01"
     }
    ],
@@ -9228,7 +9228,7 @@
    ],
    "evidence": [
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "Internal firewall"
     },
     {
@@ -9252,7 +9252,7 @@
    ],
    "evidence": [
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "EDR"
     }
    ],
@@ -9277,7 +9277,7 @@
      "line": 8
     },
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "Web proxy"
     }
    ],
@@ -9299,27 +9299,27 @@
    ],
    "evidence": [
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 6
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 7
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 8
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 9
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 10
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9004"
     }
    ],
@@ -9342,15 +9342,15 @@
    ],
    "evidence": [
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 9
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 6
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9004"
     }
    ],
@@ -9371,7 +9371,7 @@
    ],
    "evidence": [
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "SRV-DB01"
     }
    ],
@@ -9418,19 +9418,19 @@
      "line": 6
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 1
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 2
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 3
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9001"
     }
    ],
@@ -9461,7 +9461,7 @@
      "line": 9
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 2
     }
    ],
@@ -9491,7 +9491,7 @@
      "line": 4
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 2
     }
    ],
@@ -9512,7 +9512,7 @@
    ],
    "evidence": [
     {
-     "file": "20_log_coverage.md",
+     "file": "20_log_source_coverage.md",
      "row": "Domain controller"
     }
    ],
@@ -9540,7 +9540,7 @@
      "row": "CHG-2026-1104-02"
     },
     {
-     "file": "13_web_access_log.md",
+     "file": "13_web_server_log.md",
      "line": 12
     },
     {
@@ -9548,7 +9548,7 @@
      "line": 9
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9006"
     }
    ],
@@ -9576,7 +9576,7 @@
      "row": "CHG-2026-1104-03"
     },
     {
-     "file": "12_dc_security_log.md",
+     "file": "12_windows_dc_auth_log.md",
      "line": 11
     },
     {
@@ -9584,7 +9584,7 @@
      "line": 14
     },
     {
-     "file": "17_ids_alerts.md",
+     "file": "17_ids_alert_summary.md",
      "row": "ALT-9007"
     }
    ],

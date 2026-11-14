@@ -13,7 +13,7 @@
 - id: g04_sql_success_line
   question: Which SQL injection request returned success?
   tags: [timeline, sql]
-  expect: {answer_contains_any: ['06:06:02'], citations_include: [{file: 13_web_access_log.md, line: 9}]}
+  expect: {answer_contains_any: ['06:06:02'], citations_include: [{file: 13_web_server_log.md, line: 9}]}
 - id: g05_line_numbers
   question: Cite the first port scan denial.
   tags: [citations]
@@ -45,7 +45,7 @@
 - id: g12_inc2_severity
   question: What is the SQL injection incident severity?
   tags: [severity, inc2]
-  expect: {severity: P2, severity_steps_min: 3, entities_include: ['incident:INC-2'], citations_include: [{file: 13_web_access_log.md, line: 9}]}
+  expect: {severity: P2, severity_steps_min: 3, entities_include: ['incident:INC-2'], citations_include: [{file: 13_web_server_log.md, line: 9}]}
 - id: g13_inc3_severity
   question: What is the severity of the 192.0.2.88 scan?
   tags: [severity, inc3]
@@ -129,7 +129,7 @@
 - id: g33_missing_fs
   question: Which files were read from FS01?
   tags: [missing]
-  expect: {labels: {not_enough_evidence_contains: ['file audit']}, answer_contains_any: ['not enough evidence in the logs'], citations_include: [{file: 20_coverage_and_rules.md, row: Internal firewall}]}
+  expect: {labels: {not_enough_evidence_contains: ['file audit']}, answer_contains_any: ['not enough evidence in the logs'], citations_include: [{file: 20_log_source_coverage.md, row: Internal firewall}]}
 - id: g34_missing_db
   question: Did the attacker read the orders database?
   tags: [missing]
@@ -173,7 +173,7 @@
 - id: g44_quarantine
   question: Why was the phishing mail delivered?
   tags: [phishing]
-  expect: {answer_contains_any: ['6.2', '8.0'], citations_include: [{file: 20_coverage_and_rules.md, row: Email gateway}]}
+  expect: {answer_contains_any: ['6.2', '8.0'], citations_include: [{file: 20_log_source_coverage.md, row: Email gateway}]}
 - id: g45_transfer_action
   question: What action preserves evidence after the transfer?
   tags: [actions]
@@ -193,7 +193,7 @@
 - id: g49_scan_cites
   question: What evidence supports the external scan?
   tags: [inc3]
-  expect: {citations_include: [{file: 14_firewall_perimeter_log.md, line: 6}, {file: 13_web_access_log.md, line: 1}]}
+  expect: {citations_include: [{file: 14_firewall_perimeter_log.md, line: 6}, {file: 13_web_server_log.md, line: 1}]}
 - id: g50_inc1_actions
   question: List the credential compromise actions for amalik.
   tags: [actions]
