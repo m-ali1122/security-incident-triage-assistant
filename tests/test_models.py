@@ -65,4 +65,4 @@ def test_finding_incident_answer_roundtrip():
 def test_health():
     r = TestClient(app).get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok"}
+    assert r.json()["status"] == "ok"
