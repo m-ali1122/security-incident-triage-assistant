@@ -1,21 +1,32 @@
 "use strict";
-// Data source. Empty string = read everything from mock.json. A URL = call the live API.
-// Can be overridden with ?api=http://localhost:8000
+// Data source. Order of precedence:
+//   ?mock=1                      -> mock.json
+//   ?api=URL                     -> that API
+//   served over http(s) at /app* -> the same origin (the API serves this page)
+//   anything else (file://, other static server) -> mock.json
+// API_BASE is a manual default for a non-standard deployment. Empty = decide as above.
 const API_BASE = "";
 
-const BASE = (() => {
-  let v = API_BASE;
+const SRC = (() => {
+  const mock = (why) => ({ base: "", label: "mock data (" + why + ")", live: false });
   try {
-    const q = new URLSearchParams(location.search).get("api");
-    if (q !== null) v = q;
-    if (v) {
-      const u = new URL(v, location.href);
-      if (u.protocol !== "http:" && u.protocol !== "https:") return "";
-      v = u.origin + u.pathname;
+    const qs = new URLSearchParams(location.search);
+    if (qs.get("mock") === "1") return mock("?mock=1");
+    const httpish = location.protocol === "http:" || location.protocol === "https:";
+    let v = qs.get("api");
+    let how = "?api=";
+    if (v === null || v === "") {
+      v = API_BASE; how = "API_BASE";
+      if (!v && httpish && /^\/app(\/|$)/.test(location.pathname)) { v = location.origin; how = "same origin"; }
     }
-  } catch (e) { /* fall through with default */ }
-  return String(v || "").replace(/\/+$/, "");
+    if (!v) return mock(httpish ? "static server, no API" : "opened as a file");
+    const u = new URL(v, location.href);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return mock("bad api url");
+    const base = (u.origin + u.pathname).replace(/\/+$/, "");
+    return { base, label: "live API " + base + " (" + how + ")", live: true };
+  } catch (e) { return mock("error reading url"); }
 })();
+const BASE = SRC.base;
 
 // ---------- tiny DOM helpers. Never innerHTML: log fields are attacker-controlled ----------
 function el(tag, props, ...kids) {
@@ -37,6 +48,16 @@ function el(tag, props, ...kids) {
 }
 const $ = (id) => document.getElementById(id);
 function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+function chatErrBox(e) {
+  const st = e && e.status;
+  const why = st === 503 ? "The answer service is not available right now (503)."
+    : st === 504 ? "The answer service timed out (504)."
+    : st === 500 ? "The answer service hit an internal error (500)."
+    : st === 0 ? "The API is not reachable."
+    : "The question could not be answered.";
+  return el("div", { class: "err", role: "alert" }, el("b", { text: why }), " ", el("span", { text: (e && e.message) || String(e) }),
+    el("div", { class: "muted small", text: "The rest of the page still works. You can ask again." }));
+}
 const empty = (t) => el("div", { class: "empty", text: t });
 function errBox(e) { return el("div", { class: "err", role: "alert", text: "Could not load: " + (e && e.message ? e.message : String(e)) }); }
 
@@ -65,8 +86,17 @@ async function mockApi(method, path, body) {
     const o = (body && body.overrides && body.overrides[0]) || {};
     const key = o.kind === "severity_cell" ? `severity_cell:${o.row}:${o.column}:${o.value}`
       : `change_status:${o.change_id}:${o.status}`;
-    return m.whatif[key] || { hypothetical: true, diff: [], note: "Mock mode only knows two presets: Data exfiltration / High / P2, and CHG-2026-1104-05 set to Approved. Use the live API for anything else." };
+    if (m.whatif[key]) return m.whatif[key];
+    const want = String(o.row || "").toLowerCase();
+    const hit = Object.keys(m.whatif).find((k) => {
+      const q = k.split(":");
+      return o.kind === "severity_cell" && q[0] === "severity_cell" && q[2] === o.column && q[3] === o.value &&
+        (String(q[1]).toLowerCase().startsWith(want) || want.startsWith(String(q[1]).toLowerCase()));
+    });
+    if (hit) return m.whatif[hit];
+    return { hypothetical: true, diff: [], note: "Mock mode only knows two presets: the data exfiltration cell lowered to P2, and CHG-2026-1104-05 set to Approved. Use the live API for anything else." };
   }
+  if (p === "/resolve") throw new Error("entity resolution needs the live API (not in mock.json)");
   const mm = p.match(/^\/findings\/(.+)$/);
   if (mm) {
     const f = m.findings[decodeURIComponent(mm[1])];
@@ -76,13 +106,30 @@ async function mockApi(method, path, body) {
   throw new Error("mock: no route " + path);
 }
 
+class ApiError extends Error {
+  constructor(msg, status, body) { super(msg); this.status = status; this.body = body; }
+}
+// API errors look like {error, detail}. detail may hold a stack trace: show only the first lines.
+function errMessage(method, path, status, j) {
+  const e = j && typeof j === "object" ? j : {};
+  let detail = e.detail !== undefined ? (typeof e.detail === "string" ? e.detail : JSON.stringify(e.detail)) : "";
+  detail = detail.split(/\r?\n/).filter((x) => x.trim()).slice(0, 2).join(" ").slice(0, 300);
+  const head = e.error ? String(e.error) : "HTTP " + status;
+  return `${head}${detail && detail !== head ? ": " + detail : ""} (${method} ${path}, HTTP ${status})`;
+}
 async function api(method, path, body) {
   if (!BASE) return mockApi(method, path, body);
   const opt = { method };
   if (body !== undefined) { opt.headers = { "Content-Type": "application/json" }; opt.body = JSON.stringify(body); }
-  const r = await fetch(BASE + path, opt);
-  if (!r.ok) throw new Error(`${method} ${path}: HTTP ${r.status}`);
-  return r.json();
+  let r;
+  try { r = await fetch(BASE + path, opt); }
+  catch (e) { throw new ApiError(`${method} ${path}: network error, the API is not reachable`, 0, null); }
+  if (!r.ok) {
+    let j = null;
+    try { j = await r.json(); } catch (e) { /* not JSON */ }
+    throw new ApiError(errMessage(method, path, r.status, j), r.status, j);
+  }
+  try { return await r.json(); } catch (e) { throw new ApiError(`${method} ${path}: response was not JSON`, r.status, null); }
 }
 
 // ---------- state ----------
@@ -203,7 +250,7 @@ function whyBlock(f, label) {
   d.addEventListener("toggle", async () => {
     if (!d.open || loaded) return;
     loaded = true;
-    if (f.steps === undefined && f.finding_id) {
+    if ((!f.steps || !f.steps.length) && f.finding_id) {
       body.textContent = "Loading trace...";
       try { f = Object.assign({}, f, await api("GET", "/findings/" + encodeURIComponent(f.finding_id))); } catch (e) { body.textContent = ""; body.append(errBox(e)); return; }
     }
@@ -271,12 +318,14 @@ function section(label, node) { return node ? el("div", { class: "sect" }, el("d
 
 // ---------- chat ----------
 function renderAnswer(a) {
+  a = a || {};
   const st = a.structured || {};
   const f = chipFactory();
   const card = el("article", { class: "card answer" });
-  card.append(richText(a.answer, f), f.box);
-  if (st.severity) {
-    card.append(section("Severity", sevBadge(st.severity, st.severity_steps)));
+  card.append(richText(a.answer ? a.answer : "(The service returned an empty answer.)", f), f.box);
+  const sevVal = st.severity && typeof st.severity === "object" ? st.severity.value : st.severity;
+  if (sevVal) {
+    card.append(section("Severity", sevBadge(sevVal, st.severity_steps || (st.severity && st.severity.steps))));
   }
   const g = labelGroups(st.labels);
   if (g) card.append(g);
@@ -300,7 +349,7 @@ async function ask(question) {
     const a = await api("POST", "/ask", { question });
     pending.replaceWith(renderAnswer(a));
     if (a.meta && a.meta.provider) { S.lastProvider = a.meta.provider; renderStatus(); }
-  } catch (e) { pending.replaceWith(errBox(e)); }
+  } catch (e) { pending.replaceWith(chatErrBox(e)); }
   $("ask-btn").disabled = false;
   log.lastElementChild.scrollIntoView({ block: "nearest" });
 }
@@ -338,7 +387,7 @@ function timelineTable(events, compact) {
   return el("table", { class: "tl" + (compact ? " compact" : "") },
     el("thead", {}, el("tr", {}, el("th", { text: "UTC [PKT]" }), el("th", { text: "Event" }), el("th", { text: "File and line" }), el("th", { text: "Inc." }))), tbody);
 }
-const INC_LABEL = { "ANOM-1": "ANOM-1 utariq anomaly", HARMLESS: "Closed as harmless", "": "Unassigned" };
+const incLabel = (i) => (i === "HARMLESS" ? "Closed as harmless" : i === "" ? "Unassigned" : /^ANOM/.test(i) ? i + " (anomaly, not merged)" : i);
 async function viewTimeline() {
   const out = $("timeline");
   try {
@@ -350,8 +399,8 @@ async function viewTimeline() {
     const ids = new Set(); let hasNone = false;
     for (const e of events) { const i = incidentOf(e); if (i) ids.add(i); else hasNone = true; }
     sel.append(el("option", { value: "*", text: "All" }));
-    [...ids].sort().forEach((i) => sel.append(el("option", { value: i, text: INC_LABEL[i] || i })));
-    if (hasNone) sel.append(el("option", { value: "", text: INC_LABEL[""] }));
+    [...ids].sort().forEach((i) => sel.append(el("option", { value: i, text: incLabel(i) })));
+    if (hasNone) sel.append(el("option", { value: "", text: incLabel("") }));
     sel.addEventListener("change", paint); $("tl-text").addEventListener("input", paint);
   }
   function paint() {
@@ -366,6 +415,9 @@ async function viewTimeline() {
     clear(out).append(timelineTable(list));
   }
   paint();
+  const gaps = (!Array.isArray(S.timeline) && S.timeline.gaps) || [];
+  const gbox = clear($("tl-gaps"));
+  if (gaps.length) gbox.append(el("h3", { text: "Gaps in the logs" }), ...gaps.map(gapEl));
 }
 
 // ---------- report ----------
@@ -379,6 +431,18 @@ function gapEl(g) {
   const win = g.from_utc || g.to_utc ? el("span", { class: "win" }, timeEl(g.from_utc), " to ", timeEl(g.to_utc)) : el("span", { class: "win muted", text: "no log exists, whole source" });
   return el("div", { class: "card gap" }, el("div", {}, el("b", { class: "mono", text: g.source }), " "), win,
     el("div", { text: g.reason || "" }), g.evidence && g.evidence.length ? chipList(g.evidence) : null);
+}
+function decoyEl(d) {
+  const li = el("li", {}, el("span", { class: "chg mono", text: d.change_id }), " " + (d.why || ""));
+  const meta = [d.status && "status: " + d.status, d.system && "system: " + d.system, d.performed_by && "by: " + d.performed_by, d.window_pkt && "window: " + d.window_pkt + " PKT"].filter(Boolean).join(" . ");
+  if (meta) li.append(el("div", { class: "muted small", text: meta }));
+  if (d.cite) li.append(chipList([d.cite]));
+  if (d.near_misses && d.near_misses.length) {
+    li.append(el("details", { class: "why" }, el("summary", {}, "closest activity"),
+      el("div", { class: "why-body" }, d.near_misses.map((n) => el("div", {}, el("b", { text: n.activity }), n.matched && n.matched.length ? " matched: " + n.matched.join(", ") : " matched nothing",
+        el("ul", { class: "plain" }, (n.reasons || []).map((r) => el("li", { text: r }))))))));
+  }
+  return li;
 }
 function harmlessEl(h) {
   return el("div", { class: "card hl" },
@@ -431,6 +495,7 @@ async function viewReport() {
     const b = el("button", { type: "button", "aria-pressed": String(i.incident_id === currentInc), onclick: () => { currentInc = i.incident_id; viewReport(); } }, i.incident_id);
     sw.append(b);
   }
+  for (const i of list) indexEvents(i.timeline);
   $("report-meta").textContent = `facts ${S.report.facts_hash || "?"}${S.report.date ? " . " + S.report.date : ""}`;
   const inc = list.find((i) => i.incident_id === currentInc);
   clear(out).append(el("h2", {}, inc.incident_id + ": " + (inc.title || ""), " ", sevBadge(typeof inc.severity === "string" ? inc.severity : inc.severity && inc.severity.value, inc.severity && inc.severity.steps || inc.severity_steps)), renderIncidentReport(inc));
@@ -448,10 +513,14 @@ async function viewPanels() {
   } catch (e) { for (const id of ["harmless", "gaps", "decoys", "entities"]) clear($(id)).append(errBox(e)); return; }
   const f = S.facts;
   const hl = f.closed_as_harmless || f.harmless || [];
-  clear($("harmless")).append(hl.length ? hl.map(harmlessEl) : empty("Nothing closed as harmless."));
+  clear($("harmless")).append(...(hl.length ? hl.map(harmlessEl) : [empty("Nothing closed as harmless.")]));
   const dec = f.decoys || [];
-  clear($("decoys")).append(dec.length ? el("ul", { class: "plain" }, dec.map((d) => el("li", {}, el("span", { class: "chg mono", text: d.change_id }), " " + d.why))) : empty("None."));
-  clear($("gaps")).append((f.gaps || []).length ? f.gaps.map(gapEl) : empty("No gaps."));
+  clear($("decoys")).append(dec.length ? el("ul", { class: "plain" }, dec.map(decoyEl)) : empty("None."));
+  const gp = clear($("gaps"));
+  const ms = f.missing_sources || [];
+  if (ms.length) gp.append(...ms.map(gapEl));
+  if ((f.gaps || []).length) gp.append(el("h3", { text: "Gaps inside a source" }), ...f.gaps.map(gapEl));
+  if (!ms.length && !(f.gaps || []).length) gp.append(empty("No gaps."));
   const ent = clear($("entities"));
   try {
     if (!S.entities) S.entities = await api("GET", "/entities");
@@ -466,12 +535,124 @@ async function viewPanels() {
         if (l.assumption) b.append(el("div", { class: "assume" }, el("b", {}, "Assumption: "), l.assumption));
         b.append(chipList(l.evidence));
       }
+      if (!(e.links || []).length) b.append(el("div", { class: "muted small", text: "No links recorded for this entity." }));
+      b.append(el("button", { type: "button", class: "link", onclick: () => { $("res-id").value = e.id; $("res-form").requestSubmit(); $("res-form").scrollIntoView({ block: "nearest" }); } }, "resolve this entity"));
       d.append(b); ent.append(d);
     }
   } catch (e) { ent.append(errBox(e)); }
 }
 
+// ---------- entity resolution ----------
+function initResolve() {
+  $("res-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const id = $("res-id").value.trim(), at = $("res-at").value.trim();
+    const out = clear($("res-out"));
+    if (!id) { out.append(empty("Enter an identifier such as an IP address, a username or asset:A-1005.")); return; }
+    try {
+      const q = "?identifier=" + encodeURIComponent(id) + (at ? "&at=" + encodeURIComponent(at) : "");
+      const r = await api("GET", "/resolve" + q);
+      const card = el("div", { class: "card" }, el("div", {}, el("b", { class: "mono", text: r.identifier || id }), " ", el("span", { class: "muted", text: `${r.kind || "?"}${r.is_external ? " . external" : ""}` })));
+      if (r.text) card.append(el("div", { class: "mono small", text: r.text }));
+      if (r.asset) card.append(el("div", { class: "small", text: `asset ${r.asset.tag} ${r.asset.hostname} (${r.asset.type}), criticality ${r.asset.criticality}, owner ${r.asset.owner || "?"}` }));
+      if (r.user) card.append(el("div", { class: "small", text: `user ${r.user.username || ""} ${r.user.full_name || ""}`.trim() }));
+      if (r.session) card.append(el("div", { class: "small mono", text: typeof r.session === "string" ? r.session : JSON.stringify(r.session) }));
+      if (r.steps && r.steps.length) card.append(el("ol", { class: "plain" }, r.steps.map((s) => el("li", {}, s.text || "", s.cite ? [" ", chipList([s.cite])] : null))));
+      for (const l of r.links || []) {
+        card.append(el("div", { class: "mono small", text: `${l.a} -> ${l.b} (${l.type}, ${l.basis})` }));
+        if (l.valid_from || l.valid_to) card.append(el("div", { class: "small" }, "valid ", timeEl(l.valid_from), " to ", timeEl(l.valid_to)));
+        if (l.assumption) card.append(el("div", { class: "assume" }, el("b", {}, "Assumption: "), l.assumption));
+      }
+      if (r.note) card.append(el("div", { class: "assume" }, el("b", {}, "Note: "), r.note));
+      out.append(card);
+    } catch (e) {
+      out.append(e && e.status === 404 ? empty("Nothing in the fact store matches that identifier" + (at ? " at that time." : ".")) : errBox(e));
+    }
+  });
+}
+
 // ---------- what-if ----------
+// Rows, columns and change IDs come from the API (incident parts, asset criticality, /facts),
+// never from strings typed here. Datalists keep free text possible; the server fuzzy-matches rows.
+const SEV_ORDER = ["P1", "P2", "P3", "P4"];
+function wiData() {
+  const incs = Array.isArray(S.incidents) ? S.incidents : (S.incidents && S.incidents.incidents) || (S.facts && S.facts.incidents) || [];
+  const rows = [], cols = [], parts = [], changes = [];
+  for (const i of incs) {
+    const crit = new Map();
+    for (const a of i.affected_assets || []) { if (a.criticality) { crit.set(a.tag, a.criticality); if (!cols.includes(a.criticality)) cols.push(a.criticality); } }
+    for (const p of i.parts || []) {
+      if (!p.type) continue;
+      if (!rows.includes(p.type)) rows.push(p.type);
+      parts.push({ incident: i.incident_id, type: p.type, severity: p.severity, column: crit.get(p.asset) || null, inc_severity: typeof i.severity === "string" ? i.severity : i.severity && i.severity.value });
+    }
+  }
+  const f = S.facts || {};
+  for (const h of f.closed_as_harmless || []) if (h.change_id) changes.push({ id: h.change_id, role: "harmless", alert: h.alert });
+  for (const d of f.decoys || []) if (d.change_id) changes.push({ id: d.change_id, role: "decoy", status: d.status });
+  return { rows, cols, parts, changes };
+}
+function setOptions(listId, values) { const l = clear($(listId)); for (const v of values) l.append(el("option", { value: v })); }
+function fillWhatIf(o) {
+  const kind = $("wi-kind");
+  kind.value = o.kind; kind.dispatchEvent(new Event("change"));
+  if (o.kind === "severity_cell") { $("wi-row").value = o.row; $("wi-col").value = o.column; $("wi-val").value = o.value; }
+  else { $("wi-chid").value = o.change_id; $("wi-status").value = o.status; }
+}
+function populateWhatIf() {
+  const d = wiData();
+  setOptions("wi-rows", d.rows); setOptions("wi-changes", d.changes.map((c) => c.id));
+  const col = $("wi-col");
+  for (const c of d.cols) if (![...col.options].some((o) => o.value === c)) col.append(el("option", { value: c, text: c }));
+  const box = clear($("wi-presets"));
+  const presets = [];
+  // Lower the part that sets an incident's severity by one level.
+  const top = d.parts.find((p) => p.severity && p.severity === p.inc_severity && p.column && SEV_ORDER.indexOf(p.severity) >= 0 && SEV_ORDER.indexOf(p.severity) < SEV_ORDER.length - 1);
+  if (top) {
+    const to = SEV_ORDER[SEV_ORDER.indexOf(top.severity) + 1];
+    presets.push({ label: `${top.type} / ${top.column}: ${top.severity} to ${to}`, o: { kind: "severity_cell", row: top.type, column: top.column, value: to } });
+  }
+  const hl = d.changes.find((c) => c.role === "harmless");
+  if (hl) presets.push({ label: `${hl.id} (closes ${hl.alert}): postponed, not performed`, o: { kind: "change_status", change_id: hl.id, status: "Postponed, not performed" } });
+  const dc = d.changes.find((c) => c.role === "decoy");
+  if (dc) presets.push({ label: `${dc.id} (approves nothing): approved`, o: { kind: "change_status", change_id: dc.id, status: "Approved" } });
+  if (presets.length) box.append(el("span", { class: "muted small", text: "Presets from the data:" }));
+  for (const p of presets) box.append(el("button", { type: "button", class: "link", onclick: () => { fillWhatIf(p.o); $("whatif-form").requestSubmit(); } }, p.label));
+  if (presets.length && !$("wi-row").value && !$("wi-chid").value) fillWhatIf(presets[0].o);
+}
+const harmlessKey = (h) => `${h.alert || "?"} ${h.change_id || ""}`.trim();
+function whatifResult(r) {
+  const card = el("div", { class: "card" }, el("span", { class: "lbl", text: "hypothetical" }));
+  const diff = r.diff || [];
+  card.append(el("h3", { text: "What changed in the inputs" }));
+  card.append(diff.length
+    ? el("table", { class: "diff" }, el("thead", {}, el("tr", {}, ["What", "Before", "After", "Note"].map((h) => el("th", { text: h })))),
+      el("tbody", {}, diff.map((d) => el("tr", {}, el("td", { text: d.what }), el("td", { class: "mono", text: String(d.before) }), el("td", { class: "mono", text: String(d.after) }), el("td", { text: d.note || "" })))))
+    : el("p", { text: "No change in any severity or label." }));
+  const incs = r.incidents || [];
+  if (incs.length) {
+    const anyChange = incs.some((i) => i.severity_before !== i.severity_after);
+    card.append(el("h3", { text: "Incident severity" }),
+      el("table", { class: "diff" }, el("thead", {}, el("tr", {}, ["Incident", "Before", "After", ""].map((h) => el("th", { text: h })))),
+        el("tbody", {}, incs.map((i) => {
+          const ch = i.severity_before !== i.severity_after;
+          return el("tr", {}, el("td", { text: i.incident_id }), el("td", { class: "mono", text: String(i.severity_before ?? "none") }), el("td", { class: "mono", text: String(i.severity_after ?? "none") }), el("td", { text: ch ? "changed" : "same" }));
+        }))),
+      ...(anyChange ? [] : [el("p", { class: "muted", text: "No incident severity changed." })]));
+  }
+  if (r.harmless_before || r.harmless_after) {
+    const hb = r.harmless_before || [], ha = r.harmless_after || [];
+    const kb = new Set(hb.map(harmlessKey)), ka = new Set(ha.map(harmlessKey));
+    const dropped = hb.filter((h) => !ka.has(harmlessKey(h))), added = ha.filter((h) => !kb.has(harmlessKey(h)));
+    card.append(el("h3", { text: "Closed as harmless" }),
+      el("p", { text: `Before: ${hb.length ? hb.map(harmlessKey).join(", ") : "none"}. After: ${ha.length ? ha.map(harmlessKey).join(", ") : "none"}.` }),
+      ...[dropped.length ? el("p", { class: "assume" }, el("b", { text: "No longer harmless: " }), dropped.map(harmlessKey).join(", ")) : null,
+      added.length ? el("p", { class: "assume" }, el("b", { text: "Newly harmless: " }), added.map(harmlessKey).join(", ")) : null,
+      !dropped.length && !added.length ? el("p", { class: "muted", text: "The harmless list is unchanged." }) : null].filter(Boolean));
+  }
+  if (r.note) card.append(el("p", { text: r.note }));
+  return card;
+}
 function initWhatIf() {
   const kind = $("wi-kind");
   kind.addEventListener("change", () => { $("wi-sev").hidden = kind.value !== "severity_cell"; $("wi-chg").hidden = kind.value !== "change_status"; });
@@ -480,19 +661,15 @@ function initWhatIf() {
   $("whatif-form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
     const o = kind.value === "severity_cell"
-      ? { kind: "severity_cell", row: $("wi-row").value, column: $("wi-col").value, value: $("wi-val").value }
-      : { kind: "change_status", change_id: $("wi-chid").value, status: $("wi-status").value };
+      ? { kind: "severity_cell", row: $("wi-row").value.trim(), column: $("wi-col").value, value: $("wi-val").value }
+      : { kind: "change_status", change_id: $("wi-chid").value.trim(), status: $("wi-status").value };
     const out = clear($("whatif-out"));
+    out.append(el("div", { class: "muted", text: "Recomputing..." }));
     try {
       const r = await api("POST", "/whatif", { overrides: [o] });
       $("whatif-banner").hidden = !(r.hypothetical !== false);
-      out.append(el("div", { class: "card" }, el("span", { class: "lbl", text: "hypothetical" }),
-        r.diff && r.diff.length
-          ? el("table", { class: "diff" }, el("thead", {}, el("tr", {}, ["What", "Before", "After", "Note"].map((h) => el("th", { text: h })))),
-            el("tbody", {}, r.diff.map((d) => el("tr", {}, el("td", { text: d.what }), el("td", { class: "mono", text: String(d.before) }), el("td", { class: "mono", text: String(d.after) }), el("td", { text: d.note || "" })))))
-          : el("p", { text: "No change in any severity or label." }),
-        r.note ? el("p", { text: r.note }) : null));
-    } catch (e) { out.append(errBox(e)); }
+      clear(out).append(whatifResult(r));
+    } catch (e) { clear(out).append(errBox(e)); }
   });
 }
 
@@ -500,7 +677,8 @@ function initWhatIf() {
 function renderStatus() {
   const box = clear($("status"));
   const h = S.health;
-  if (!h) { box.append(el("span", { class: "item" }, el("span", { class: "dot bad" }), "API unreachable")); return; }
+  box.append(el("span", { class: "item", title: SRC.label }, "source: ", el("b", { class: "mono", text: SRC.live ? "live" : "mock" })));
+  if (!h) { box.append(el("span", { class: "item" }, el("span", { class: "dot bad" }), SRC.live ? "API unreachable" : "no health data")); return; }
   box.append(el("span", { class: "item" }, el("span", { class: `dot ${h.status === "ok" ? "ok" : "warn"}` }), `service ${h.status || "?"}`));
   const pool = h.pool && (h.pool.providers || h.pool);
   const entries = Array.isArray(pool) ? pool : Object.entries(pool || {}).map(([name, v]) => Object.assign({ name }, v));
@@ -511,6 +689,7 @@ function renderStatus() {
     const txt = open ? `breaker open${p.breaker_until_s ? " " + p.breaker_until_s + "s" : ""}` : cool ? `${cool}/${p.keys ?? "?"} keys cooling` : "ready";
     box.append(el("span", { class: "item", title: p.last_error || "" }, el("span", { class: `dot ${cls}` }), `${p.name}: ${txt}`));
   }
+  if (h.llm_enabled !== undefined) box.append(el("span", { class: "item" }, el("span", { class: `dot ${h.llm_enabled ? "ok" : "warn"}` }), h.llm_enabled ? "llm on" : "llm off (rules only)"));
   const last = S.lastProvider || h.last_provider;
   box.append(el("span", { class: "item" }, "last answer: ", el("b", { class: "mono", text: last || "none yet" })));
   box.append(el("span", { class: "item mono", title: "Hash of the input files" }, "facts " + String(h.facts_hash || S.facts && S.facts.facts_hash || "?").slice(0, 12)));
@@ -521,7 +700,7 @@ async function pollHealth() {
 }
 
 // ---------- tabs ----------
-const VIEWS = { chat: null, report: viewReport, timeline: viewTimeline, panels: viewPanels, whatif: null };
+const VIEWS = { chat: null, report: viewReport, timeline: viewTimeline, panels: viewPanels, whatif: () => populateWhatIf() };
 function showView(name) {
   for (const b of document.querySelectorAll(".tabs [role=tab]")) {
     const on = b.dataset.view === name;
@@ -546,8 +725,11 @@ function initTabs() {
 
 // ---------- boot ----------
 async function boot() {
-  $("mode").textContent = BASE ? "live: " + BASE : "mock data";
-  initTabs(); initChat(); initWhatIf();
+  $("mode").textContent = SRC.live ? "live API" : "mock data";
+  $("mode").title = SRC.label;
+  const dl = $("dl-report");
+  if (SRC.live) dl.href = BASE + "/report.md"; else dl.hidden = true;
+  initTabs(); initChat(); initWhatIf(); initResolve();
   const [h, f, inc, tl] = await Promise.allSettled([api("GET", "/health"), api("GET", "/facts"), api("GET", "/incidents"), api("GET", "/timeline")]);
   S.health = h.status === "fulfilled" ? h.value : null;
   if (f.status === "fulfilled") { S.facts = f.value; indexEvents(S.facts.events); }
@@ -558,6 +740,7 @@ async function boot() {
     for (const i of list) for (const id of i.timeline || []) if (typeof id === "string") INCOF.set(id, i.incident_id);
   }
   renderStatus();
+  populateWhatIf();
   setInterval(pollHealth, 30000);
   const start = (location.hash || "").slice(1);
   if (VIEWS.hasOwnProperty(start) && start !== "chat") showView(start);

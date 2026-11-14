@@ -52,6 +52,7 @@
     <div class="bar">
       <div id="inc-switch" class="switch" role="group" aria-label="Incident"></div>
       <span id="report-meta" class="muted small"></span>
+      <a id="dl-report" class="link" href="/report.md" download="report.md">Download report (.md)</a>
     </div>
     <div id="report"></div>
   </section>
@@ -67,6 +68,7 @@
       <span id="tl-count" class="muted small" aria-live="polite"></span>
     </div>
     <div id="timeline"></div>
+    <div id="tl-gaps"></div>
   </section>
 
   <section id="view-panels" role="tabpanel" aria-labelledby="tab-panels" hidden>
@@ -83,6 +85,12 @@
       </div>
     </div>
     <h2>Entity resolution</h2>
+    <form id="res-form" class="whatif" autocomplete="off">
+      <label class="field grow">Resolve an identifier <input id="res-id" placeholder="IP, username, asset:A-1005, session" maxlength="200"></label>
+      <label class="field">At (UTC, optional) <input id="res-at" placeholder="2026-11-04T05:00:00Z" maxlength="40"></label>
+      <button type="submit" class="primary">Resolve</button>
+    </form>
+    <div id="res-out" aria-live="polite"></div>
     <div id="entities"></div>
   </section>
 
@@ -97,7 +105,8 @@
         </select>
       </label>
       <span id="wi-sev" class="inline">
-        <label class="field">Incident type <input id="wi-row" value="Data exfiltration"></label>
+        <label class="field">Incident type (matrix row) <input id="wi-row" list="wi-rows" size="44"></label>
+        <datalist id="wi-rows"></datalist>
         <label class="field">Column
           <select id="wi-col"><option>Medium</option><option selected>High</option><option>Critical</option><option>Low</option></select>
         </label>
@@ -106,13 +115,15 @@
         </label>
       </span>
       <span id="wi-chg" class="inline" hidden>
-        <label class="field">Change ID <input id="wi-chid" value="CHG-2026-1104-05"></label>
+        <label class="field">Change ID <input id="wi-chid" list="wi-changes" size="20"></label>
+        <datalist id="wi-changes"></datalist>
         <label class="field">Status
           <select id="wi-status"><option selected>Approved</option><option>Postponed, not performed</option></select>
         </label>
       </span>
       <button type="submit" class="primary">Recompute</button>
     </form>
+    <div id="wi-presets" class="bar"></div>
     <div id="whatif-out" aria-live="polite"></div>
   </section>
 </main>
