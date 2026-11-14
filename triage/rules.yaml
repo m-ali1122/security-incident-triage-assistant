@@ -1,0 +1,174 @@
+# Rule engine parameters (P7). Every entry cites the rule or table it implements.
+# No identifier from the data pack (IP, user, host, alert, change, runbook, person, time)
+# lives here: only thresholds, keywords and patterns.
+
+version: 1
+
+# Which parser `kind` feeds which role. Kinds come from triage/profiles/*.yaml.
+sources:
+  cites: "ARCHITECTURE section 4"
+  vpn: [vpn_auth, vpn_session, vpn_session_end]
+  dc: [windows_auth, dc_auth]
+  web: [web_request]
+  perimeter_fw: [firewall_connection]
+  internal_fw: [firewall_session]
+  email: [email_message]
+  dhcp: [dhcp_lease]
+
+network:
+  cites: "02 notes (VPN pool), RFC 1918 private ranges"
+  internal_networks: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16]
+
+change_approval:
+  cites: "01 rule 3.1"
+  require: [system, actor, window]
+  # a status matching any of these approves nothing (table loader also sets is_effective)
+  ignore_status_patterns: ["(?i)postponed", "(?i)not performed", "(?i)cancel"]
+  alert_lookback_s: 900
+  alert_lookahead_s: 60
+
+mfa_fatigue:
+  cites: "01 rule 6.1"
+  min_rejected: 2
+  window_s: 900
+  require_new_geo: true
+  require_same_source: true
+  fail_reasons: [mfa_push_denied, mfa_push_timeout, mfa_push_rejected, mfa_denied]
+  approved_mfa: [push_approved]
+
+concurrent_use:
+  cites: "01 rule 6.2"
+  # DHCP leases are not activity (a lease only shows the laptop got an address)
+  activity_roles: [dc, perimeter_fw, internal_fw]
+
+attacker_session:
+  cites: "01 rule 2.1; 12; 15"
+  kerberos_pattern: "(?i)kerberos"
+  password_reset_pattern: "(?i)password (reset|change)"
+  lockout_pattern: "(?i)lock(ed)? ?out"
+  failed_logon_pattern: "(?i)logon failed|failure"
+  interactive_logon_pattern: "(?i)logon type|interactive|remote desktop"
+  notice_mail_window_s: 300
+  lockout_alert_window_s: 300
+
+password_reset:
+  cites: "12; 01 rule 2.1"
+
+account_lockout:
+  cites: "12; 17; 01 rule 2.1"
+
+asset_session:
+  cites: "15; 01 rule 4.1"
+  kerberos_ports: [88]
+
+interactive_logon:
+  cites: "12; ARCHITECTURE section 11"
+
+phishing:
+  cites: "16; 01 rule 2.1"
+  lookalike_max_distance: 2
+  delivered_actions: [delivered]
+  quarantine_threshold_default: 8.0
+
+phishing_delivered:
+  cites: "16; 20 Email gateway row; 01 rule 2.1"
+
+phishing_click:
+  cites: "06 step 4; 14; 17"
+
+phishing_no_click:
+  cites: "06 step 4; 20"
+  missing_source_keywords: [proxy]
+
+phishing_credential_entry:
+  cites: "01 rule 2.2; 03 rule note"
+
+large_transfer:
+  cites: "09 step 1; 01 rule 2.4"
+  # outlier = modified z-score of log10(bytes) using median and MAD (Iglewicz-Hoaglin)
+  scale: log10
+  modified_z_threshold: 3.5
+  min_bytes: 104857600
+  alert_size_tolerance: 0.15
+
+web_attack:
+  cites: "08 steps 1 and 3"
+  attack_patterns:
+    - "(?i)union\\s+(all\\s+)?select"
+    - "(?i)'\\s*or\\s*'"
+    - "(?i)\\border\\s+by\\s+\\d+"
+    - "(?i)waitfor\\s+delay"
+    - "(?i)sleep\\s*\\("
+    - "=[^&]*'"
+    - "(?i)<script"
+    - "\\.\\./"
+  attack_user_agents: ["(?i)sqlmap", "(?i)nikto", "(?i)havij"]
+  db_missing_source_keywords: [query]
+
+web_attack_success:
+  cites: "08 step 3"
+  success_status: 200
+  min_size_ratio: 3
+
+recon:
+  cites: "10; 01 rule 3.1"
+  min_denied_ports: 3
+  window_s: 300
+  probe_window_s: 300
+  alternate_reading_row: "web attempts"
+
+coverage_missing:
+  cites: "20 not collected"
+
+coverage_gap:
+  cites: "20 coverage column"
+
+change_approved:
+  cites: "01 rules 3.1 and 3.2; 05"
+
+severity:
+  cites: "03; 01 rules 4.1 to 4.3"
+  trigger_labels: [confirmed, suspected]
+  # matrix note: "A phishing email where a click is seen is handled as <row>"
+  click_note_pattern: "(?i)click is seen is handled as (.+?)\\.?$"
+  click_rule: phishing_click
+  parts:
+    - {row: "credential compromise", when: [mfa_fatigue, attacker_session], click_counts: true}
+    - {row: "exfiltration", when: [large_transfer]}
+    - {row: "web success", when: [web_attack_success]}
+    - {row: "web attempts", when: [web_attack], unless: [web_attack_success]}
+    - {row: "scanning", when: [recon], alternate: "web attempts"}
+    - {row: "phishing", when: [phishing_delivered], unless: [phishing_click]}
+  reach:
+    # findings that show a confirmed login or session on an asset (01 rule 4.1)
+    rules: [asset_session, mfa_fatigue, large_transfer, web_attack, recon, interactive_logon]
+    # ARCHITECTURE section 11: Kerberos traffic to the DC is not a logon on the DC.
+    count_kerberos_as_reach: false
+    interactive_only_types: ["domain controller"]
+    interactive_rule: interactive_logon
+
+escalation:
+  cites: "04; 01 rule 5.2"
+  sensitive_condition_keywords: [finance, hr, customer]
+
+actions:
+  cites: "01 rule 5.1"
+  entry:
+    - {rules: [phishing_delivered], runbook_keyword: phishing}
+    - {rules: [mfa_fatigue, attacker_session, phishing_click], runbook_keyword: credential}
+    - {rules: [large_transfer], runbook_keyword: exfiltration}
+    - {rules: [web_attack], runbook_keyword: web}
+    - {rules: [recon], runbook_keyword: scan}
+  anomaly: {runbook_keyword: credential, steps: [1]}
+  # conditions written in runbook steps -> incident fact that must hold
+  conditions:
+    - {pattern: "(?i)^if a click is found", fact: click_found}
+    - {pattern: "(?i)^if it is approved", fact: approved}
+    - {pattern: "(?i)^if it is not approved", fact: not_approved}
+    - {pattern: "(?i)^if .*source is external", fact: external_source}
+    - {pattern: "(?i)^if the source is internal", fact: internal_source}
+    - {pattern: "(?i)^if phishing was the source", fact: phishing_source}
+  # a runbook referenced inside a step is opened only if this fact holds
+  open_conditions:
+    - {pattern: "(?i)if a click is found", fact: click_found}
+    - {pattern: "(?i)if a large data transfer is seen", fact: large_transfer}
