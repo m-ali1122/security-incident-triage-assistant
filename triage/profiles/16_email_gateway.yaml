@@ -1,0 +1,10 @@
+file: 16_email_gateway_log.md
+kind: email_message
+line_regex: '^\[(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) PKT\] (?P<rest>.*)$'
+kv_rest: true
+ts_format: '%Y-%m-%d %H:%M:%S'
+timezone: PKT
+ts_means: event
+duration_field: duration_s
+untrusted_fields: [subject, from, url_host]
+

@@ -1,0 +1,9 @@
+file: 19_dhcp_lease_log.md
+kind: dhcp_lease
+line_regex: '^(?P<ts>\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} [+-]\d{2}:\d{2}) (?P<action>\S+) (?P<rest>.*)$'
+kv_rest: true
+ts_format: '%Y-%m-%d %H:%M:%S %z'
+timezone: offset
+ts_means: event
+duration_field: duration_s
+untrusted_fields: []

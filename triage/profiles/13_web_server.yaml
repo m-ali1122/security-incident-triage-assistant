@@ -1,0 +1,11 @@
+file: 13_web_server_log.md
+kind: web_request
+line_regex: '^((?P<src_ip>\S+) - - \[(?P<ts>[^]]+)\] "(?P<method>\S+) (?P<path>\S+) HTTP/[^"]+" (?P<status>\d+) (?P<size>\d+) "(?P<referrer>[^"]*)" "(?P<user_agent>[^"]*)")$'
+kv_rest: false
+ts_format: '%d/%b/%Y:%H:%M:%S %z'
+timezone: offset
+ts_means: event
+duration_field: duration_s
+untrusted_fields: [user_agent, path]
+int_fields: [status, size]
+

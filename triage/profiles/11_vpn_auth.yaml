@@ -1,0 +1,12 @@
+file: 11_vpn_auth_log.md
+kind: vpn_auth
+line_regex:
+  - '^((?P<ts>\S+) (?P<device>\S+) auth) (?P<rest>.*)$'
+  - '^(?P<ts>\S+) (?P<device>\S+) session_end (?P<rest>.*)$'
+kv_rest: true
+ts_format: '%Y-%m-%dT%H:%M:%SZ'
+timezone: UTC
+ts_means: event
+duration_field: duration_s
+untrusted_fields: []
+
