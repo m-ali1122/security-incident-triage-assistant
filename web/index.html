@@ -3,134 +3,325 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>Incident Triage Assistant</title>
+<meta name="color-scheme" content="light">
+<title>Casefile: security incident triage</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Hanken+Grotesk:wght@400..700&family=JetBrains+Mono:wght@400..600&display=swap">
 <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
+<body class="booting">
+<a class="skip" href="#app">Skip to the console</a>
 
-<header class="top">
-  <div class="brand">
-    <span class="logo" aria-hidden="true">&#9670;</span>
-    <h1>Incident Triage</h1>
-    <span id="mode" class="tag" title="Data source"></span>
+<!-- ============ LOADER ============ -->
+<div id="loader" class="loader" role="status" aria-label="Loading Casefile">
+  <div class="loader-top">
+    <span class="wordmark">Casefile</span>
+    <button type="button" id="loader-skip" class="pill dark">Skip intro</button>
   </div>
-  <div id="status" class="status" role="status" aria-live="polite" aria-label="System status">
-    <span class="muted">status loading</span>
+  <div class="loader-body">
+    <span class="mono-s muted-l" id="loader-sub">Connecting to the fact store</span>
+    <div class="loader-pct"><span id="loader-pct">0</span><span class="pct-sign">%</span></div>
+    <div class="loader-bar" aria-hidden="true"><span id="loader-fill"></span></div>
+    <ol id="boot-steps" class="boot-steps">
+      <li data-step="health"><span class="mono-s">01 <i class="mk"></i></span><b>Fact store</b><span class="bs-v">connecting</span></li>
+      <li data-step="facts"><span class="mono-s">02 <i class="mk"></i></span><b>Parse logs</b><span class="bs-v">waiting</span></li>
+      <li data-step="coverage"><span class="mono-s">03 <i class="mk"></i></span><b>Map coverage</b><span class="bs-v">waiting</span></li>
+      <li data-step="graph"><span class="mono-s">04 <i class="mk"></i></span><b>Link identities</b><span class="bs-v">waiting</span></li>
+      <li data-step="rules"><span class="mono-s">05 <i class="mk"></i></span><b>Run rules</b><span class="bs-v">waiting</span></li>
+      <li data-step="ready"><span class="mono-s">06 <i class="mk"></i></span><b>Ready</b><span class="bs-v">waiting</span></li>
+    </ol>
   </div>
-</header>
-
-<nav class="tabs" role="tablist" aria-label="Views">
-  <button role="tab" id="tab-chat" aria-controls="view-chat" aria-selected="true" data-view="chat">Chat</button>
-  <button role="tab" id="tab-report" aria-controls="view-report" aria-selected="false" tabindex="-1" data-view="report">Report</button>
-  <button role="tab" id="tab-timeline" aria-controls="view-timeline" aria-selected="false" tabindex="-1" data-view="timeline">Timeline</button>
-  <button role="tab" id="tab-panels" aria-controls="view-panels" aria-selected="false" tabindex="-1" data-view="panels">Harmless and gaps</button>
-  <button role="tab" id="tab-whatif" aria-controls="view-whatif" aria-selected="false" tabindex="-1" data-view="whatif">What-if</button>
-</nav>
-
-<div id="whatif-banner" class="banner" hidden role="alert">
-  <strong>HYPOTHETICAL.</strong> A what-if result is shown below. It is not the real fact store.
-  <button type="button" id="whatif-clear" class="link">Clear</button>
 </div>
 
-<main id="main">
-  <section id="view-chat" role="tabpanel" aria-labelledby="tab-chat">
-    <form id="ask-form" class="ask" autocomplete="off">
-      <label for="q" class="sr">Question</label>
-      <textarea id="q" rows="2" placeholder="Ask about the incident, an asset, an IP, an alert or a change ID" maxlength="2000"></textarea>
-      <button type="submit" class="primary" id="ask-btn">Ask</button>
-    </form>
-    <div class="samples" aria-label="Sample questions">
-      <span class="muted small">Try:</span>
-      <span id="samples"></span>
-    </div>
-    <div id="chat-log" class="chat-log" aria-live="polite"></div>
-  </section>
+<!-- ============ PITCH ============ -->
+<div id="pitch" class="pitch">
+  <header class="p-head">
+    <span class="wordmark">Casefile</span>
+    <nav aria-label="Pitch sections" class="p-nav">
+      <a href="#proof">What it gets right</a>
+      <a href="#day">The day</a>
+      <a href="#how">How it works</a>
+    </nav>
+    <button type="button" class="pill ink" data-open="ask">Open the console &rarr;</button>
+  </header>
 
-  <section id="view-report" role="tabpanel" aria-labelledby="tab-report" hidden>
-    <div class="bar">
-      <div id="inc-switch" class="switch" role="group" aria-label="Incident"></div>
-      <span id="report-meta" class="muted small"></span>
-      <a id="dl-report" class="link" href="/report.md" download="report.md">Download report (.md)</a>
-    </div>
-    <div id="report"></div>
-  </section>
-
-  <section id="view-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden>
-    <div class="bar">
-      <label class="field">Incident
-        <select id="tl-inc"></select>
-      </label>
-      <label class="field grow">Filter text
-        <input id="tl-text" type="search" placeholder="IP, user, file, alert ID">
-      </label>
-      <span id="tl-count" class="muted small" aria-live="polite"></span>
-    </div>
-    <div id="timeline"></div>
-    <div id="tl-gaps"></div>
-  </section>
-
-  <section id="view-panels" role="tabpanel" aria-labelledby="tab-panels" hidden>
-    <div class="cols">
-      <div>
-        <h2>Closed as harmless</h2>
-        <div id="harmless"></div>
-        <h3>Changes that approve nothing</h3>
-        <div id="decoys"></div>
-      </div>
-      <div>
-        <h2>Missing log sources</h2>
-        <div id="gaps"></div>
+  <section class="hero">
+    <div class="hero-copy">
+      <span data-rv="up" class="tagline mono-s" id="hero-tag">Security incident triage</span>
+      <h1 data-rv="lines" class="h-display">
+        <span class="ln-w"><span data-ln="1">Every answer</span></span>
+        <span class="ln-w"><span data-ln="1">shows the log line</span></span>
+        <span class="ln-w"><span data-ln="1" class="blue">that proves it.</span></span>
+      </h1>
+      <p data-rv="up" class="lede">Casefile reads one day of security logs and tells an analyst what happened, how bad it is and who to call. Code works out every fact. The language model only writes the sentence.</p>
+      <div data-rv="up" class="row-12">
+        <button type="button" class="pill blue big" data-open="ask">Open the console &rarr;</button>
+        <a href="#proof" class="pill line big">See what it gets right</a>
       </div>
     </div>
-    <h2>Entity resolution</h2>
-    <form id="res-form" class="whatif" autocomplete="off">
-      <label class="field grow">Resolve an identifier <input id="res-id" placeholder="IP, username, asset:A-1005, session" maxlength="200"></label>
-      <label class="field">At (UTC, optional) <input id="res-at" placeholder="2026-11-04T05:00:00Z" maxlength="40"></label>
-      <button type="submit" class="primary">Resolve</button>
-    </form>
-    <div id="res-out" aria-live="polite"></div>
-    <div id="entities"></div>
+    <div data-rv="up" class="hero-art">
+      <div id="hero-box" class="hero-box" aria-hidden="true"><canvas id="hero-canvas"></canvas></div>
+      <span class="muted" id="hero-cap">Log files go in. Each answer pulls out the one line that proves it.</span>
+    </div>
   </section>
 
-  <section id="view-whatif" role="tabpanel" aria-labelledby="tab-whatif" hidden>
-    <h2>What-if policy editor</h2>
-    <p class="muted">Change one policy cell and see what recomputes. Nothing is written to the data. Results are marked hypothetical.</p>
-    <form id="whatif-form" class="whatif">
-      <label class="field">Change
-        <select id="wi-kind">
-          <option value="severity_cell">Severity matrix cell</option>
-          <option value="change_status">Change calendar status</option>
-        </select>
-      </label>
-      <span id="wi-sev" class="inline">
-        <label class="field">Incident type (matrix row) <input id="wi-row" list="wi-rows" size="44"></label>
-        <datalist id="wi-rows"></datalist>
-        <label class="field">Column
-          <select id="wi-col"><option>Medium</option><option selected>High</option><option>Critical</option><option>Low</option></select>
-        </label>
-        <label class="field">New severity
-          <select id="wi-val"><option>P1</option><option selected>P2</option><option>P3</option><option>P4</option></select>
-        </label>
-      </span>
-      <span id="wi-chg" class="inline" hidden>
-        <label class="field">Change ID <input id="wi-chid" list="wi-changes" size="20"></label>
-        <datalist id="wi-changes"></datalist>
-        <label class="field">Status
-          <select id="wi-status"><option selected>Approved</option><option>Postponed, not performed</option></select>
-        </label>
-      </span>
-      <button type="submit" class="primary">Recompute</button>
-    </form>
-    <div id="wi-presets" class="bar"></div>
-    <div id="whatif-out" aria-live="polite"></div>
+  <section class="stats-wrap">
+    <div data-rv="stagger" class="stats" id="stats">
+      <div data-it="1" class="stat"><span class="stat-n" data-count="0" data-key="files">0</span><span>log files parsed</span></div>
+      <div data-it="1" class="stat"><span class="stat-n" data-count="0" data-key="events">0</span><span>events, each with its file and line</span></div>
+      <div data-it="1" class="stat"><span class="stat-n" data-count="0" data-key="incidents">0</span><span id="stat-inc-l">incidents found</span></div>
+      <div data-it="1" class="stat"><span class="stat-n" data-count="0" data-key="harmless">0</span><span>alerts closed as harmless</span></div>
+      <div data-it="1" class="stat"><span class="stat-n blue" data-count="0" data-key="missing">0</span><span>log sources that were never collected</span></div>
+    </div>
   </section>
-</main>
 
-<footer class="foot muted small">
-  Times are UTC with PKT (UTC+5) in brackets. Log text shown here is untrusted data and is never executed.
-</footer>
-<script src="app.js"></script>
+  <section id="proof" class="dark-sec">
+    <div class="sec-head">
+      <span data-rv="up" class="mono-s muted-l">What it gets right</span>
+      <h2 data-rv="lines" class="h-2">
+        <span class="ln-w"><span data-ln="1">The data is full of traps.</span></span>
+        <span class="ln-w"><span data-ln="1" class="blue-l">Casefile walks around them.</span></span>
+      </h2>
+    </div>
+    <div id="traps" class="traps"></div>
+  </section>
+
+  <section id="day" class="sec">
+    <div class="sec-head">
+      <span data-rv="up" class="mono-s muted">The day, in UTC</span>
+      <h2 data-rv="lines" class="h-2">
+        <span class="ln-w"><span data-ln="1" id="day-h1">Incidents overlap.</span></span>
+        <span class="ln-w"><span data-ln="1">They stay separate.</span></span>
+      </h2>
+      <p data-rv="up" class="sub">Happening at the same time is not evidence of the same attacker. Incidents are joined only when a log links the actor.</p>
+    </div>
+    <div data-rv="up" class="card day-card">
+      <div class="day-grid" id="day-grid"></div>
+      <p class="muted small" id="day-note"></p>
+    </div>
+  </section>
+
+  <section id="how" class="white-sec">
+    <div class="sec-head">
+      <span data-rv="up" class="mono-s muted">How it works</span>
+      <h2 data-rv="lines" class="h-2">
+        <span class="ln-w"><span data-ln="1">Code computes.</span></span>
+        <span class="ln-w"><span data-ln="1" class="blue">The model only words.</span></span>
+      </h2>
+    </div>
+    <div class="how-steps">
+      <div aria-hidden="true" data-rv="line" class="how-line"></div>
+      <ol data-rv="stagger" class="steps" id="how-steps"></ol>
+    </div>
+    <div data-rv="stagger" class="pillars">
+      <div data-it="1" class="pillar"><b>Whitebox</b><span>Every conclusion has numbered steps and a file and line behind it. Click a citation and the raw line opens.</span></div>
+      <div data-it="1" class="pillar"><b>Unpluggable</b><span>Hit a rate limit and the next key or provider answers. If every model is down, a template writes the same facts.</span></div>
+      <div data-it="1" class="pillar"><b>Adaptable</b><span>The severity matrix, runbooks, change calendar and log formats are data. Change a cell and the output changes.</span></div>
+    </div>
+  </section>
+
+  <section class="sec cta">
+    <h2 data-rv="lines" class="h-display">
+      <span class="ln-w"><span data-ln="1">Ask it the</span></span>
+      <span class="ln-w"><span data-ln="1">trap question.</span></span>
+    </h2>
+    <p data-rv="up" class="sub big">"Which files did the attacker copy?" The logs cannot answer that, and Casefile says so.</p>
+    <button data-rv="up" type="button" class="pill blue huge" id="open-trap">Open the console and ask &rarr;</button>
+  </section>
+  <footer class="p-foot"><span id="foot-l">Proof of concept. No outside knowledge is used.</span><span class="mono" id="foot-r"></span></footer>
+</div>
+
+<!-- ============ CONSOLE ============ -->
+<div id="app" class="app" hidden>
+  <aside class="side">
+    <div class="side-top"><span class="wordmark">Casefile</span><span class="mono-s muted" id="side-date"></span></div>
+    <nav aria-label="Console" class="side-nav" role="tablist">
+      <button type="button" role="tab" data-view="chat" aria-controls="view-chat"><span>Ask</span><span class="hint"></span></button>
+      <button type="button" role="tab" data-view="graph" aria-controls="view-graph"><span>Graph</span><span class="hint">3D</span></button>
+      <button type="button" role="tab" data-view="timeline" aria-controls="view-timeline"><span>Timeline</span><span class="hint">UTC</span></button>
+      <button type="button" role="tab" data-view="report" aria-controls="view-report"><span>Report</span><span class="hint">11</span></button>
+      <button type="button" role="tab" data-view="entities" aria-controls="view-entities"><span>Entities</span><span class="hint"></span></button>
+      <button type="button" role="tab" data-view="panels" aria-controls="view-panels"><span>Coverage</span><span class="hint"></span></button>
+      <button type="button" role="tab" data-view="whatif" aria-controls="view-whatif"><span>What-if</span><span class="hint"></span></button>
+      <button type="button" role="tab" data-view="system" aria-controls="view-system"><span>System</span><span class="hint"></span></button>
+    </nav>
+    <div id="status" class="status" role="status" aria-live="polite" aria-label="System status"></div>
+    <button type="button" class="back" id="back-pitch">&larr; Back to the pitch</button>
+  </aside>
+
+  <main class="main" id="main">
+    <div id="whatif-banner" class="banner" hidden role="alert">
+      <strong>HYPOTHETICAL.</strong> A what-if result is shown. It is not the real fact store.
+      <button type="button" id="whatif-clear" class="link">Clear</button>
+    </div>
+
+    <!-- ask -->
+    <section id="view-chat" class="view" role="tabpanel">
+      <div class="ask-layout">
+        <div class="ask-col">
+          <div class="v-head"><h1>Ask the logs</h1><span class="muted">Every claim carries a citation. Click one to see its source.</span></div>
+          <form id="ask-form" class="askbox" autocomplete="off">
+            <label for="q" class="sr">Your question</label>
+            <input id="q" type="text" maxlength="2000" placeholder="Ask about the day, for example: who owned 10.10.3.45?">
+            <button type="submit" class="ask-btn" id="ask-btn">Ask</button>
+          </form>
+          <div id="samples" class="pills" role="group" aria-label="Example questions"></div>
+          <div id="chat-log" class="chat-log" aria-live="polite">
+            <div class="card dashed" id="chat-hello"><b class="h-s">Pick a question to start.</b><span class="muted">Try "Which files did the attacker copy?" to see how Casefile handles a question the logs cannot answer.</span></div>
+          </div>
+        </div>
+        <aside aria-label="Source" class="source" id="source">
+          <span class="mono-s muted-l">SOURCE</span>
+          <span class="src-empty">Click a citation in an answer and the source line shows here, with the values Casefile read from it.</span>
+        </aside>
+      </div>
+    </section>
+
+    <!-- graph -->
+    <section id="view-graph" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>Evidence graph</h1><span class="muted">People, devices, addresses and sessions, linked only where a log or table says so. Query it, or click anything to see its evidence.</span></div>
+      <div class="graph-shell">
+        <div class="graph-stage" id="graph-stage">
+          <div id="graph-canvas" class="graph-canvas" aria-label="Evidence knowledge graph"></div>
+          <div id="graph-tip" class="graph-tip" hidden></div>
+          <div class="graph-legend" id="graph-legend" aria-label="Legend"></div>
+          <form id="gq-form" class="gq" autocomplete="off">
+            <label for="gq" class="sr">Query the graph</label>
+            <input id="gq" type="search" placeholder="Ask a question, or type an IP, user, asset or session" maxlength="400">
+            <button type="submit" class="ask-btn">Query</button>
+            <button type="button" id="gq-clear" class="pill line" hidden>Clear</button>
+          </form>
+          <div id="gq-status" class="gq-status" aria-live="polite"></div>
+        </div>
+        <aside class="graph-side">
+          <div class="gs-block">
+            <label class="field">Find an entity
+              <input id="g-search" list="g-search-list" placeholder="amalik, 10.10.3.45, SRV-FS01" maxlength="200">
+            </label>
+            <datalist id="g-search-list"></datalist>
+          </div>
+          <div class="gs-block"><div class="cap">Incident</div><div id="g-inc" class="pills sm" role="group" aria-label="Filter by incident"></div></div>
+          <div class="gs-block"><div class="cap">Node kinds</div><div id="g-kinds" class="kinds" role="group" aria-label="Filter by node kind"></div></div>
+          <div class="gs-block">
+            <div class="cap">Time <span id="g-time-l" class="mono blue"></span></div>
+            <input id="g-time" type="range" min="0" max="1000" value="1000" aria-label="Show edges valid up to this time">
+            <div class="muted small">Edges appear once their event or validity window has started.</div>
+          </div>
+          <div class="gs-block gs-detail" id="g-detail" aria-live="polite"><div class="muted small">Click a node or an edge to see its evidence.</div></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- timeline -->
+    <section id="view-timeline" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>Timeline</h1><span class="muted">Every event in UTC order, with Pakistan time in brackets.</span></div>
+      <div class="bar">
+        <div id="tl-filters" class="pills" role="group" aria-label="Filter by incident"></div>
+        <select id="tl-inc" class="sr" aria-hidden="true" tabindex="-1"></select>
+        <label class="field grow">Filter text <input id="tl-text" type="search" placeholder="IP, user, file, alert ID"></label>
+        <span id="tl-count" class="muted small" aria-live="polite"></span>
+      </div>
+      <div id="timeline" class="card flush scroll-x"></div>
+      <div id="tl-gaps"></div>
+    </section>
+
+    <!-- report -->
+    <section id="view-report" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>Incident report</h1><span class="muted">11 sections per incident. Written by code, with zero model calls.</span></div>
+      <div class="bar">
+        <div id="inc-switch" class="pills" role="group" aria-label="Incident"></div>
+        <span id="report-meta" class="muted small mono"></span>
+        <a id="dl-report" class="pill line" href="/report.md" download="report.md">Download .md</a>
+      </div>
+      <div class="rep-layout">
+        <nav aria-label="Report sections" class="rep-nav" id="rep-nav"></nav>
+        <div id="report" class="report"></div>
+      </div>
+    </section>
+
+    <!-- entities -->
+    <section id="view-entities" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>Entity lookup</h1><span class="muted">An IP address belongs to a person only while their session is open. Pick an address and a time.</span></div>
+      <div class="card pad">
+        <div id="ip-opts" class="pills" role="group" aria-label="Address"></div>
+        <form id="res-form" class="formrow" autocomplete="off">
+          <label class="field grow">Identifier <input id="res-id" placeholder="IP, username, asset:A-1005, session" maxlength="200"></label>
+          <label class="field">At (UTC, optional) <input id="res-at" placeholder="2026-11-04T05:00:00Z" maxlength="40"></label>
+          <button type="submit" class="ask-btn">Resolve</button>
+        </form>
+        <div class="tslider">
+          <div class="ts-top"><label for="res-t" class="b">Time (UTC)</label><span class="ts-big" id="res-t-l">--:--</span></div>
+          <input id="res-t" type="range" min="0" max="1439" step="1" value="540">
+          <div class="ts-axis mono-s muted"><span>00:00</span><span id="res-t-hint">drag to resolve at a time</span><span>24:00</span></div>
+        </div>
+        <div id="res-out" aria-live="polite"></div>
+      </div>
+      <h2 class="h-3">All entities</h2>
+      <div id="entities" class="card pad"></div>
+    </section>
+
+    <!-- coverage -->
+    <section id="view-panels" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>Coverage and approvals</h1><span class="muted">What the logs cannot see, and which alerts an approved change explains.</span></div>
+      <div class="cols">
+        <section class="card pad">
+          <h2 class="h-3">Closed as harmless</h2>
+          <div id="harmless"></div>
+          <h3 class="cap">Changes that approve nothing</h3>
+          <div id="decoys"></div>
+        </section>
+        <section class="card pad">
+          <h2 class="h-3">Missing log sources</h2>
+          <div id="gaps"></div>
+        </section>
+      </div>
+    </section>
+
+    <!-- what-if -->
+    <section id="view-whatif" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>What-if</h1><span class="muted">Change one policy cell and see what recomputes. Nothing is written to the data. Results are marked hypothetical.</span></div>
+      <div class="card pad">
+        <form id="whatif-form" class="formrow">
+          <label class="field">Change
+            <select id="wi-kind">
+              <option value="severity_cell">Severity matrix cell</option>
+              <option value="change_status">Change calendar status</option>
+            </select>
+          </label>
+          <span id="wi-sev" class="inline">
+            <label class="field grow">Incident type (matrix row) <input id="wi-row" list="wi-rows"></label>
+            <datalist id="wi-rows"></datalist>
+            <label class="field">Column
+              <select id="wi-col"><option>Medium</option><option selected>High</option><option>Critical</option><option>Low</option></select>
+            </label>
+            <label class="field">New severity
+              <select id="wi-val"><option>P1</option><option selected>P2</option><option>P3</option><option>P4</option></select>
+            </label>
+          </span>
+          <span id="wi-chg" class="inline" hidden>
+            <label class="field">Change ID <input id="wi-chid" list="wi-changes"></label>
+            <datalist id="wi-changes"></datalist>
+            <label class="field">Status
+              <select id="wi-status"><option selected>Approved</option><option>Postponed, not performed</option></select>
+            </label>
+          </span>
+          <button type="submit" class="ask-btn">Recompute</button>
+        </form>
+        <div id="wi-presets" class="bar"></div>
+      </div>
+      <div id="whatif-out" aria-live="polite"></div>
+    </section>
+
+    <!-- system -->
+    <section id="view-system" class="view" role="tabpanel" hidden>
+      <div class="v-head"><h1>System</h1><span class="muted">Live readings from /health: which providers and keys can answer right now, and what answered last.</span></div>
+      <div class="card pad" id="system"></div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js" defer></script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
