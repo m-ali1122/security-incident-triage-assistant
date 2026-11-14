@@ -1,19 +1,23 @@
-"""P6: identity resolution chains and entity activity lookup."""
+"""P6: module-level helpers over a cached EvidenceGraph."""
 from __future__ import annotations
 
-from datetime import datetime
-from typing import Any, Optional, Union
+from triage.graph.build import Chain, EvidenceGraph, build_graph
 
-from triage.models import Event
-
-Chain = Any  # resolution chain with Cite evidence per hop, defined by P6
+_CACHE: dict = {}
 
 
-def resolve(identifier: str, at_utc: Optional[Union[str, datetime]] = None) -> Chain:
-    """Resolve an IP, hostname, FQDN, tag or username to its entity, as a chain of evidence."""
-    raise NotImplementedError("P6")
+def get_graph(data_dir=None) -> EvidenceGraph:
+    key = str(data_dir) if data_dir is not None else None
+    if key not in _CACHE:
+        from triage.parsers.logs import parse_all
+        from triage.parsers.tables import load_tables
+        _CACHE[key] = build_graph(parse_all(data_dir), load_tables(data_dir))
+    return _CACHE[key]
 
 
-def touched(entity: str, from_utc: Union[str, datetime], to_utc: Union[str, datetime]) -> list[Event]:
-    """Events involving `entity` between from_utc and to_utc."""
-    raise NotImplementedError("P6")
+def resolve(identifier, at_utc=None) -> Chain:
+    return get_graph().resolve(identifier, at_utc)
+
+
+def touched(entity, from_utc=None, to_utc=None) -> list:
+    return get_graph().touched(entity, from_utc, to_utc)
